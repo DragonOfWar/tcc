@@ -9,6 +9,9 @@ from skmultiflow.data import ConceptDriftStream
 from skmultiflow.evaluation import EvaluatePrequential
 from skmultiflow.data.file_stream import FileStream
 from skmultiflow.data.random_tree_generator import RandomTreeGenerator
+from skmultiflow.data import SEAGenerator
+from skmultiflow.meta import AdaptiveRandomForestClassifier
+from skmultiflow.data.hyper_plane_generator  import HyperplaneGenerator
 
 # Adaptive XGBoost classifier parameters
 n_estimators = 30       # Number of members in the ensemble
@@ -17,8 +20,8 @@ max_depth = 6           # Max depth for each tree in the ensemble
 max_window_size = 1000  # Max window size
 min_window_size = 1     # set to activate the dynamic window strategy
 detect_drift = False    # Enable/disable drift detection
-ratio_unsampled = 0
-small_window_size = 100
+ratio_unsampled = 0.99
+small_window_size = 150
 
 ## autor push
 # AXGBp = AdaptiveXGBoostClassifier(update_strategy='push',
@@ -37,13 +40,14 @@ small_window_size = 100
 #                                   min_window_size=min_window_size,
 #                                   detect_drift=detect_drift)
 ## autor replace
-# AXGBr = AdaptiveXGBoostClassifier(update_strategy='replace',
-#                                   n_estimators=n_estimators,
-#                                   learning_rate=learning_rate,
-#                                   max_depth=max_depth,
-#                                   max_window_size=max_window_size,
-#                                   min_window_size=min_window_size,
-#                                   detect_drift=detect_drift)
+AXGBr = AdaptiveXGBoostClassifier(update_strategy='replace',
+                                  n_estimators=n_estimators,
+                                  learning_rate=learning_rate,
+                                  max_depth=max_depth,
+                                  max_window_size=max_window_size,
+                                  min_window_size=min_window_size,
+                                  detect_drift=detect_drift,
+                                  ratio_unsampled=ratio_unsampled)
 
 ## meu incremental
 AXGBg = Adaptive4(learning_rate=learning_rate,
@@ -67,9 +71,10 @@ AXGBg2 = AdaptiveSemi(learning_rate=learning_rate,
 #                                   min_window_size=min_window_size,
 #                                   detect_drift=detect_drift)
 
-# stream = ConceptDriftStream(random_state=1000,
-#                             position=50000)
-stream = FileStream("./datasets/hyper_f.csv")
+# stream = FileStream("./datasets/airlines.csv")
+stream = SEAGenerator()
+# stream = ConceptDriftStream(random_state=748,
+#                             position=120000)
 # stream = RandomTreeGenerator(tree_random_state=23, sample_random_state=12, n_classes=2, n_cat_features=2,
 #                                  n_num_features=5, n_categories_per_cat_feature=5, max_tree_depth=6, min_leaf_depth=3,
 #                                  fraction_leaves_per_level=0.15)
@@ -83,13 +88,14 @@ stream = FileStream("./datasets/hyper_f.csv")
 # classifier4 = PassiveAggressiveClassifier()
 # classifier5 = SGDRegressor()
 # classifier6 = PerceptronMask()
-
+# arf = AdaptiveRandomForestClassifier()
 
 evaluator = EvaluatePrequential(pretrain_size=0,
                                 max_samples=100000,
+                                # batch_size=5000,
                                 show_plot=True,
-                                metrics=["accuracy","running_time"])
+                                metrics=["accuracy"])
 
 evaluator.evaluate(stream=stream,
-                   model=[AXGBg2,AXGBg],
-                   model_names=['AXGB 2','supervised'])
+                   model=[AXGBg2,AXGBr],
+                   model_names=["AXGB adaptado","AXGB"])

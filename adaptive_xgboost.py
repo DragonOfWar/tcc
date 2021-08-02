@@ -35,7 +35,8 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
                  max_window_size=1000,
                  min_window_size=None,
                  detect_drift=False,
-                 update_strategy='replace'):
+                 update_strategy='replace',
+                 ratio_unsampled=0):
         """
         Adaptive XGBoost classifier.
 
@@ -90,6 +91,7 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
         self._first_run = True
         self._ensemble = None
         self.detect_drift = detect_drift
+        self._ratio_unsampled = ratio_unsampled
         self._drift_detector = None
         self._X_buffer = np.array([])
         self._y_buffer = np.array([])
@@ -163,8 +165,10 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
         # print("--- _y_buffer: %s ---" % len(self._y_buffer))
         # print("--- window size: %s ---" % self.window_size)
         while self._X_buffer.shape[0] >= self.window_size:
-            self._train_on_mini_batch(X=self._X_buffer[0:self.window_size, :],
-                                      y=self._y_buffer[0:self.window_size])
+            max_size = int(self.window_size * (1 - self._ratio_unsampled))
+            # print(max_size)
+            self._train_on_mini_batch(X=self._X_buffer[0:max_size, :],
+                                      y=self._y_buffer[0:max_size])
             delete_idx = [i for i in range(self.window_size)]
             self._X_buffer = np.delete(self._X_buffer, delete_idx, axis=0)
             self._y_buffer = np.delete(self._y_buffer, delete_idx, axis=0)
@@ -219,7 +223,7 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
         # Get margins from trees in the ensemble
         margins = np.asarray([self._init_margin] * d_mini_batch_train.num_row())
         # print("----------------------")
-        # print(self._init_margin)
+        # print(len(X))
         # print(margins)
         
         for j in range(last_model_idx):

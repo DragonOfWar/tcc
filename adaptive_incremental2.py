@@ -153,6 +153,7 @@ class Adaptive4(BaseSKMObject, ClassifierMixin):
         self.window_size = self._dynamic_window_size
 
     def _train_on_mini_batch(self, X, y):
+        print(len(X))
         booster = self._train_booster(X, y, self._model_idx)
         # Update ensemble
         self._booster = booster

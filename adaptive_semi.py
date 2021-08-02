@@ -43,9 +43,11 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         self._boosting_params = {
             "objective": "binary:logistic",
             "eta": self.learning_rate,
-            # 'update':'refresh',
-            # 'process_type': 'default',
-            # 'refresh_leaf': True,
+            'update':'refresh',
+            'process_type': 'default',
+            'refresh_leaf': True,
+            "n_estimators": 100,
+            "num_parallel_tree": 1,
             "eval_metric": "logloss",
             "max_depth": self.max_depth}
 
@@ -127,8 +129,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         if npArrX.shape[0] > 0:
             self._change_small_window(npArrX, npArrY)
         npUnlabeled = np.array(unlabeled)
-        print(npUnlabeled.shape[0])
-        # print("X inicial")
+
         if npArrX.shape[0] > 6:
             if npUnlabeled.shape[0] > 0:
                 nbrs = KNeighborsClassifier(n_neighbors=4, algorithm='ball_tree').fit(self._X_small_buffer, self._y_small_buffer)
@@ -153,8 +154,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
                         npArrYNew = np.array([biggerIndex])
                         npArrX = np.concatenate((npArrX, npArrXNew))
                         npArrY = np.concatenate((npArrY, npArrYNew))
-        # print("X final")
-        # print(npArrX.shape[0])
+        # print("semi")
+        # print(len(npArrX))
         return (npArrX, npArrY)
 
 
