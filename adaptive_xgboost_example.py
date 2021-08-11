@@ -2,7 +2,7 @@ from adaptive_xgboost import AdaptiveXGBoostClassifier
 # from adaptive_incremental_ensemble import AdaptiveXGBoostClassifier2
 # from adaptive_incremental import Adaptive2
 # from adaptive_xgboost_thread import Adaptive3
-from adaptive_incremental2 import Adaptive4
+# from adaptive_incremental2 import Adaptive4
 from adaptive_semiV2 import AdaptiveSemi
 
 from skmultiflow.data import ConceptDriftStream
@@ -23,8 +23,8 @@ detect_drift = False    # Enable/disable drift detection
 ratio_unsampled = 0
 small_window_size = 150
 
-max_buffer = 10
-pre_train = 4
+max_buffer = 50
+pre_train = 20
 
 ## autor push
 # AXGBp = AdaptiveXGBoostClassifier(update_strategy='push',
@@ -53,11 +53,11 @@ AXGBr = AdaptiveXGBoostClassifier(update_strategy='replace',
                                   ratio_unsampled=ratio_unsampled)
 
 ## meu incremental
-AXGBg = Adaptive4(learning_rate=learning_rate,
-                                  max_depth=max_depth,
-                                  max_window_size=max_window_size,
-                                  min_window_size=min_window_size,
-                                  ratio_unsampled=ratio_unsampled)
+# AXGBg = Adaptive4(learning_rate=learning_rate,
+#                                   max_depth=max_depth,
+#                                   max_window_size=max_window_size,
+#                                   min_window_size=min_window_size,
+#                                   ratio_unsampled=ratio_unsampled)
 
 AXGBg2 = AdaptiveSemi(learning_rate=learning_rate,
                                   max_depth=max_depth,
@@ -76,9 +76,9 @@ AXGBg2 = AdaptiveSemi(learning_rate=learning_rate,
 #                                   min_window_size=min_window_size,
 #                                   detect_drift=detect_drift)
 
-# stream = FileStream("./datasets/airlines.csv")
-# stream = SEAGenerator()
-stream = ConceptDriftStream(random_state=748,
+# stream = FileStream("./datasets/elec.csv")
+# stream = SEAGenerator(noise_percentage=0.1)
+stream = ConceptDriftStream(random_state=1,
                             position=50000)
 # stream = RandomTreeGenerator(tree_random_state=23, sample_random_state=12, n_classes=2, n_cat_features=2,
 #                                  n_num_features=5, n_categories_per_cat_feature=5, max_tree_depth=6, min_leaf_depth=3,
@@ -96,11 +96,11 @@ stream = ConceptDriftStream(random_state=748,
 # arf = AdaptiveRandomForestClassifier()
 
 evaluator = EvaluatePrequential(pretrain_size=0,
-                                max_samples=1000000,
-                                batch_size=1000,
-                                show_plot=True,
+                                max_samples=100000,
+                                # batch_size=200,
+                                show_plot=False,
                                 metrics=["accuracy","running_time"])
 
 evaluator.evaluate(stream=stream,
                    model=[AXGBg2,AXGBr],
-                   model_names=["AXGB adaptado", "sadd"])
+                   model_names=["AXGB adaptado","AXGB"])

@@ -133,10 +133,9 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         if npArrX.shape[0] > 0:
             self._change_small_window(npArrX, npArrY)
         npUnlabeled = np.array(unlabeled)
-
         if npArrX.shape[0] > 6:
             if npUnlabeled.shape[0] > 0:
-                nbrs = KNeighborsClassifier(n_neighbors=4, algorithm='ball_tree').fit(self._X_small_buffer, self._y_small_buffer)
+                nbrs = KNeighborsClassifier(n_neighbors=3, algorithm='ball_tree').fit(self._X_small_buffer, self._y_small_buffer)
 
                 proba = nbrs.predict_proba(npUnlabeled)
 
@@ -152,6 +151,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
                         npArrY = np.concatenate((npArrY, npArrYNew))
         # print("semi")
         # print(len(npArrX))
+        # print(len(self._X_small_buffer))
         return (npArrX, npArrY)
 
 

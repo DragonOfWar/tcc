@@ -204,6 +204,8 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
         self.window_size = self._dynamic_window_size
 
     def _train_on_mini_batch(self, X, y):
+        # print("AXGB")
+        # print(len(X))
         if self.update_strategy == self._REPLACE_STRATEGY:
             booster = self._train_booster(X, y, self._model_idx)
             # Update ensemble
