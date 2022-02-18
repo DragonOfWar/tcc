@@ -71,7 +71,7 @@ elif argumentos.CLASSIFICADOR == "incremental":
 
 evaluator = EvaluatePrequential(
     pretrain_size=0,
-    max_samples=100,
+    max_samples=200000,
     # batch_size=200,
     output_file=salvar_resultados.caminho_resultado_raw,
     show_plot=False,
