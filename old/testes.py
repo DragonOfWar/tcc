@@ -16,7 +16,7 @@ from skmultiflow.data.file_stream import FileStream
 n_estimators = 30       # Number of members in the ensemble
 learning_rate = 0.05     # Learning rate or eta
 max_depth = 6           # Max depth for each tree in the ensemble
-max_window_size = 1000  # Max window size
+max_window_size = 10000  # Max window size
 min_window_size = 1     # set to activate the dynamic window strategy
 detect_drift = False    # Enable/disable drift detection
 ratio_unsampled = 0

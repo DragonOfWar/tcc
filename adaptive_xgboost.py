@@ -245,6 +245,7 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
             self._model_idx = 0
 
     def predict(self, X):
+        # print(len(X))
         """
         Predict the class label for sample X
 

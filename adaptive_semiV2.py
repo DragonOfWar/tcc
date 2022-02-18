@@ -82,6 +82,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         AdaptiveXGBoostClassifier
             self
         """
+        # print(len(X[0]))
         for i in range(X.shape[0]):
             self._partial_fit(np.array([X[i, :]]), np.array([y[i]]))
         return self

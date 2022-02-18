@@ -10,21 +10,22 @@ from skmultiflow.evaluation import EvaluatePrequential
 from skmultiflow.data.file_stream import FileStream
 from skmultiflow.data.random_tree_generator import RandomTreeGenerator
 from skmultiflow.data import SEAGenerator
+from skmultiflow.data import AGRAWALGenerator
 from skmultiflow.meta import AdaptiveRandomForestClassifier
 from skmultiflow.data.hyper_plane_generator  import HyperplaneGenerator
 
 # Adaptive XGBoost classifier parameters
 n_estimators = 30       # Number of members in the ensemble
-learning_rate = 0.2     # Learning rate or eta
-max_depth = 6           # Max depth for each tree in the ensemble
-max_window_size = 1000  # Max window size
+learning_rate = 0.05     # Learning rate or eta
+max_depth = 5           # Max depth for each tree in the ensemble
+max_window_size = 10000  # Max window size
 min_window_size = 1     # set to activate the dynamic window strategy
 detect_drift = False    # Enable/disable drift detection
 ratio_unsampled = 0
 small_window_size = 150
 
-max_buffer = 50
-pre_train = 20
+max_buffer = 25
+pre_train = 15
 
 ## autor push
 # AXGBp = AdaptiveXGBoostClassifier(update_strategy='push',
@@ -76,10 +77,11 @@ AXGBg2 = AdaptiveSemi(learning_rate=learning_rate,
 #                                   min_window_size=min_window_size,
 #                                   detect_drift=detect_drift)
 
+stream = SEAGenerator(noise_percentage=0.1)
 # stream = FileStream("./datasets/elec.csv")
-# stream = SEAGenerator(noise_percentage=0.1)
-stream = ConceptDriftStream(random_state=1,
-                            position=50000)
+# stream = RandomTreeGenerator(n_num_features=200)
+# stream = ConceptDriftStream(random_state=1,
+#                             position=50000)
 # stream = RandomTreeGenerator(tree_random_state=23, sample_random_state=12, n_classes=2, n_cat_features=2,
 #                                  n_num_features=5, n_categories_per_cat_feature=5, max_tree_depth=6, min_leaf_depth=3,
 #                                  fraction_leaves_per_level=0.15)
@@ -95,12 +97,17 @@ stream = ConceptDriftStream(random_state=1,
 # classifier6 = PerceptronMask()
 # arf = AdaptiveRandomForestClassifier()
 
+
+# for i in range(30):
 evaluator = EvaluatePrequential(pretrain_size=0,
-                                max_samples=100000,
-                                # batch_size=200,
+                                max_samples=200000,
+                                # batch_size=1,
                                 show_plot=False,
                                 metrics=["accuracy","running_time"])
-
+# fileName = "seaAXGBr"+str(i)+".csv"
+# print(fileName)
 evaluator.evaluate(stream=stream,
-                   model=[AXGBg2,AXGBr],
-                   model_names=["AXGB adaptado","AXGB"])
+                  #  model=[AXGBg2],
+                  # output_file=fileName,
+                  model=[AXGBg2],
+                  model_names=["AXGB adaptado"])
