@@ -3,7 +3,7 @@
 COMANDO_PYTHON="python"
 ARQUIVO_PYTHON="adaptive_xgboost_example.py"
 QNT_X=30
-DATASETS=("sea" "hyper")
+DATASETS=("sea" "hyper" "airlines" "elec" "agrawal")
 CLASSIFICADORES=("axgb" "incremental")
 
 

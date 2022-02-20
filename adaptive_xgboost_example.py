@@ -4,9 +4,8 @@ import argumentos
 from adaptive_xgboost import AdaptiveXGBoostClassifier
 from adaptive_semiV2 import AdaptiveSemi
 from skmultiflow.evaluation import EvaluatePrequential
-from skmultiflow.data import SEAGenerator
-from skmultiflow.data import AGRAWALGenerator
-from skmultiflow.meta import AdaptiveRandomForestClassifier
+from skmultiflow.data import SEAGenerator, AGRAWALGenerator
+from skmultiflow.data.file_stream import FileStream
 from skmultiflow.data.hyper_plane_generator import HyperplaneGenerator
 
 
@@ -41,8 +40,12 @@ if argumentos.DATASET == "sea":
     stream = SEAGenerator(noise_percentage=0.1)
 elif argumentos.DATASET == "hyper":
     stream = HyperplaneGenerator(noise_percentage=0.1)
-# elif argumentos.DATASET == "airlines":
-#     stream =
+elif argumentos.DATASET == "agrawal":
+    stream = AGRAWALGenerator()
+elif argumentos.DATASET == "airlines":
+    stream = FileStream("datasets/airlines.csv")
+elif argumentos.DATASET == "elec":
+    stream = FileStream("datasets/elec.csv")
 
 # Criar modelo
 model = None
