@@ -37,11 +37,11 @@ pre_train = 15
 # Criar fluxo de dados
 stream = None
 if argumentos.DATASET == "sea":
-    stream = SEAGenerator(noise_percentage=0.1)
+    stream = FileStream("datasets/sea_a.csv")
 elif argumentos.DATASET == "hyper":
-    stream = HyperplaneGenerator(noise_percentage=0.1)
+    stream = FileStream("datasets/hyper_f.csv")
 elif argumentos.DATASET == "agrawal":
-    stream = AGRAWALGenerator()
+    stream = FileStream("datasets/agr_a.csv.csv")
 elif argumentos.DATASET == "airlines":
     stream = FileStream("datasets/airlines.csv")
 elif argumentos.DATASET == "elec":
