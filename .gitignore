@@ -133,3 +133,5 @@ dmypy.json
 .vscode/
 model
 temp
+resultados/
+resultados_raw/

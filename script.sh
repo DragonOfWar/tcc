@@ -6,6 +6,9 @@ QNT_X=30
 DATASETS=("sea" "hyper" "airlines" "elec" "agrawal")
 CLASSIFICADORES=("axgb" "incremental")
 
+# Criar diretórios
+[ ! -d "resultados" ] && mkdir resultados
+[ ! -d "resultados_raw" ] && mkdir resultados_raw
 
 executar_testes() {
     for dataset in ${DATASETS[@]} 
