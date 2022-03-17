@@ -11,6 +11,7 @@ import multiprocessing
 from pathos.multiprocessing import ProcessPool as Pool
 import time
 
+
 def _thread(args):
     # print(args["ensemble"])
     # print(args)
@@ -20,23 +21,26 @@ def _thread(args):
 
 def _teste(ensemble, data):
     pool = Pool(8)
-    results = pool.map(pow, [1,2,3,4], [5,6,7,8])
+    results = pool.map(pow, [1, 2, 3, 4], [5, 6, 7, 8])
     print(results)
 
+
 class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
-    _PUSH_STRATEGY = 'push'
-    _REPLACE_STRATEGY = 'replace'
+    _PUSH_STRATEGY = "push"
+    _REPLACE_STRATEGY = "replace"
     _UPDATE_STRATEGIES = [_PUSH_STRATEGY, _REPLACE_STRATEGY]
 
-    def __init__(self,
-                 n_estimators=30,
-                 learning_rate=0.3,
-                 max_depth=6,
-                 max_window_size=1000,
-                 min_window_size=None,
-                 detect_drift=False,
-                 update_strategy='replace',
-                 ratio_unsampled=0):
+    def __init__(
+        self,
+        n_estimators=30,
+        learning_rate=0.3,
+        max_depth=6,
+        max_window_size=1000,
+        min_window_size=None,
+        detect_drift=False,
+        update_strategy="replace",
+        ratio_unsampled=0,
+    ):
         """
         Adaptive XGBoost classifier.
 
@@ -91,18 +95,22 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
         self._first_run = True
         self._ensemble = None
         self.detect_drift = detect_drift
-        self._ratio_unsampled = ratio_unsampled
+        self.ratio_unsampled = ratio_unsampled
         self._drift_detector = None
         self._X_buffer = np.array([])
         self._y_buffer = np.array([])
         self._samples_seen = 0
         self._model_idx = 0
         if update_strategy not in self._UPDATE_STRATEGIES:
-            raise AttributeError("Invalid update_strategy: {}\n"
-                                 "Valid options: {}".format(update_strategy,
-                                                            self._UPDATE_STRATEGIES))
+            raise AttributeError(
+                "Invalid update_strategy: {}\n"
+                "Valid options: {}".format(update_strategy, self._UPDATE_STRATEGIES)
+            )
         self.update_strategy = update_strategy
         self._configure()
+
+    def _more_tags(self):
+        return {"pairwise": False}
 
     def _configure(self):
         if self.update_strategy == self._PUSH_STRATEGY:
@@ -112,10 +120,11 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
         self._reset_window_size()
         self._init_margin = 0.0
         self._boosting_params = {
-                                 "objective": "binary:logistic",
-                                 "eta": self.learning_rate,
-                                 "eval_metric": "logloss",
-                                 "max_depth": self.max_depth}
+            "objective": "binary:logistic",
+            "eta": self.learning_rate,
+            "eval_metric": "logloss",
+            "max_depth": self.max_depth,
+        }
         if self.detect_drift:
             self._drift_detector = ADWIN()
 
@@ -165,10 +174,11 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
         # print("--- _y_buffer: %s ---" % len(self._y_buffer))
         # print("--- window size: %s ---" % self.window_size)
         while self._X_buffer.shape[0] >= self.window_size:
-            max_size = int(self.window_size * (1 - self._ratio_unsampled))
+            max_size = int(self.window_size * (1 - self.ratio_unsampled))
             # print(max_size)
-            self._train_on_mini_batch(X=self._X_buffer[0:max_size, :],
-                                      y=self._y_buffer[0:max_size])
+            self._train_on_mini_batch(
+                X=self._X_buffer[0:max_size, :], y=self._y_buffer[0:max_size]
+            )
             delete_idx = [i for i in range(self.window_size)]
             self._X_buffer = np.delete(self._X_buffer, delete_idx, axis=0)
             self._y_buffer = np.delete(self._y_buffer, delete_idx, axis=0)
@@ -212,7 +222,7 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
             self._ensemble[self._model_idx] = booster
             self._samples_seen += X.shape[0]
             self._update_model_idx()
-        else:   # self.update_strategy == self._PUSH_STRATEGY
+        else:  # self.update_strategy == self._PUSH_STRATEGY
             booster = self._train_booster(X, y, len(self._ensemble))
             # Update ensemble
             if len(self._ensemble) == self.n_estimators:
@@ -227,16 +237,20 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
         # print("----------------------")
         # print(len(X))
         # print(margins)
-        
+
         for j in range(last_model_idx):
-            margins = np.add(margins,
-                             self._ensemble[j].predict(d_mini_batch_train, output_margin=True))
+            margins = np.add(
+                margins,
+                self._ensemble[j].predict(d_mini_batch_train, output_margin=True),
+            )
         # print(margins)
         d_mini_batch_train.set_base_margin(margin=margins)
-        booster = xgb.train(params=self._boosting_params,
-                            dtrain=d_mini_batch_train,
-                            num_boost_round=1,
-                            verbose_eval=False)
+        booster = xgb.train(
+            params=self._boosting_params,
+            dtrain=d_mini_batch_train,
+            num_boost_round=1,
+            verbose_eval=False,
+        )
         return booster
 
     def _update_model_idx(self):
@@ -265,7 +279,7 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
         if self._ensemble:
             if self.update_strategy == self._REPLACE_STRATEGY:
                 trees_in_ensemble = sum(i is not None for i in self._ensemble)
-            else:   # self.update_strategy == self._PUSH_STRATEGY
+            else:  # self.update_strategy == self._PUSH_STRATEGY
                 trees_in_ensemble = len(self._ensemble)
             if trees_in_ensemble > 0:
                 d_test = xgb.DMatrix(X)
@@ -285,11 +299,11 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
                 #         args = {'ensemble': self._ensemble[i], 'data': d_test}
                 #         future = executor.submit(_thread, args)
                 #         print(future)
-                    
-                    # executor.shutdown(wait=True)
-                    # for result in concurrent.futures.as_completed(futures):
-                    #     margin = result.result()
-                    #     d_test.set_base_margin(margin=margin)
+
+                # executor.shutdown(wait=True)
+                # for result in concurrent.futures.as_completed(futures):
+                #     margin = result.result()
+                #     d_test.set_base_margin(margin=margin)
 
                 ######################################
 
@@ -301,9 +315,9 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
                 #         d_test.set_base_margin(margin=future.result())
 
                 #     executor.shutdown(wait=True)
-                    # for result in concurrent.futures.as_completed(futures):
-                    #     margin = result.result()
-                    #     d_test.set_base_margin(margin=margin)
+                # for result in concurrent.futures.as_completed(futures):
+                #     margin = result.result()
+                #     d_test.set_base_margin(margin=margin)
 
                 ######################################
                 # print("#####################")
@@ -312,8 +326,6 @@ class AdaptiveXGBoostClassifier(BaseSKMObject, ClassifierMixin):
                     # print("single margin")
                     # print(margins)
                     d_test.set_base_margin(margin=margins)
-
-                
 
                 predicted = self._ensemble[trees_in_ensemble - 1].predict(d_test)
                 # print(d_test.get_base_margin())
