@@ -1,18 +1,41 @@
 import os
+
+import json
 import argumentos
 import pandas as pd
 
 # Config
+DIR_RESULTADOS_GRIDSEARCH = "resultados_gridsearch"
 DIR_RESULTADOS_RAW = "resultados_raw"
 DIR_RESULTADOS = "resultados"
-NOME_ARQUIVO = f"resultados_{argumentos.CLASSIFICADOR}_{argumentos.DATASET}_{argumentos.HYPERPARAMETRO}"
+NOME_ARQUIVO = f"resultados_{argumentos.CLASSIFICADOR}_{argumentos.DATASET}"
+NOME_ARQUIVO_RESULTADOS_GRID_SEARCH = (
+    f"resultados_{argumentos.CLASSIFICADOR}_{argumentos.DATASET}.csv"
+)
+NOME_ARQUIVO_MELHORES_HIPERPARAMETROS = (
+    f"melhor_hp_{argumentos.CLASSIFICADOR}_{argumentos.DATASET}.json"
+)
 
 # Gerar caminhos
-caminho_resultado = f"{DIR_RESULTADOS}/{NOME_ARQUIVO}"
-caminho_resultado_raw = f"{DIR_RESULTADOS_RAW}/{NOME_ARQUIVO}_{argumentos.VALOR_HYPERPARAMETRO}_{argumentos.ITERACAO}"
+caminho_resultado = f"{DIR_RESULTADOS}/{NOME_ARQUIVO}.csv"
+caminho_resultado_raw = f"{DIR_RESULTADOS_RAW}/{NOME_ARQUIVO}_{argumentos.ITERACAO}.csv"
+caminho_resultado_gs = (
+    f"{DIR_RESULTADOS_GRIDSEARCH}/{NOME_ARQUIVO_RESULTADOS_GRID_SEARCH}"
+)
+caminho_melhor_hp_gs = (
+    f"{DIR_RESULTADOS_GRIDSEARCH}/{NOME_ARQUIVO_MELHORES_HIPERPARAMETROS}"
+)
+
+COLUNAS = {
+    "acuracia": 1,
+    "kappa": 3,
+    "tempo_treino": 5,
+    "tempo_teste": 6,
+    "tempo_total": 7,
+}
 
 
-def salvar():
+def salvar_resultados_normal():
     # Ler o resultado do teste e criar um registro
     resultado = []
     with open(caminho_resultado_raw) as arquivo_resultado_raw:
@@ -22,19 +45,27 @@ def salvar():
     if os.path.exists(caminho_resultado):
         dados_csv = pd.read_csv(caminho_resultado, index_col=0).to_dict()
 
-    nome_coluna_acuracia = f"acuracia_{argumentos.VALOR_HYPERPARAMETRO}"
-    nome_coluna_tempo = f"tempo_total_{argumentos.VALOR_HYPERPARAMETRO}"
-
-    # Adicionar registro
-    if not nome_coluna_acuracia in dados_csv:
-        dados_csv[nome_coluna_acuracia] = {}
-    if not nome_coluna_tempo in dados_csv:
-        dados_csv[nome_coluna_tempo] = {}
-
     indice = int(argumentos.ITERACAO)
-    coluna_acuracia = dados_csv[nome_coluna_acuracia]
-    coluna_tempo = dados_csv[nome_coluna_tempo]
-    coluna_acuracia[indice] = float(resultado[1])
-    coluna_tempo[indice] = float(resultado[5])
+
+    for nome, indice_coluna in COLUNAS.items():
+        if not nome in dados_csv:
+            dados_csv[nome] = {}
+        coluna = dados_csv[nome]
+        coluna[indice] = float(resultado[indice_coluna])
 
     pd.DataFrame(data=dados_csv).to_csv(caminho_resultado, index_label="x")
+
+
+def salvar_resultados_gridsearch(resultados, melhor_hp: dict):
+    pd.DataFrame(resultados).to_csv(caminho_resultado_gs)
+    with open(caminho_melhor_hp_gs, "w") as arquivo:
+        arquivo.write(json.dumps(melhor_hp))
+
+
+# Criar diretórios
+if not os.path.isdir(DIR_RESULTADOS):
+    os.mkdir(DIR_RESULTADOS)
+if not os.path.isdir(DIR_RESULTADOS_RAW):
+    os.mkdir(DIR_RESULTADOS_RAW)
+if not os.path.isdir(DIR_RESULTADOS_GRIDSEARCH):
+    os.mkdir(DIR_RESULTADOS_GRIDSEARCH)
