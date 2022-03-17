@@ -5,7 +5,7 @@ ARQUIVO_TESTES="adaptive_xgboost_example.py"
 ARQUIVO_GRIDSEARCH="grid_cv.py"
 QNT_X=3
 DATASETS=("sea_a" "sea_g" "airlines" "elec" "agr_a" "agr_g")
-CLASSIFICADORES=("axgb" "incremental")
+CLASSIFICADORES=("axgb" "incremental" "arf" "hat")
 DIR_RESULTADOS_GS="resultados_gridsearch"
 
 
