@@ -10,16 +10,17 @@ import os
 
 
 class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
-
-    def __init__(self,
-                 learning_rate=0.3,
-                 max_depth=6,
-                 max_window_size=1000,
-                 min_window_size=None,
-                 ratio_unsampled=0,
-                 small_window_size=0,
-                 max_buffer=5,
-                 pre_train=2):
+    def __init__(
+        self,
+        learning_rate=0.3,
+        max_depth=6,
+        max_window_size=1000,
+        min_window_size=None,
+        ratio_unsampled=0,
+        small_window_size=0,
+        max_buffer=5,
+        pre_train=2,
+    ):
         super().__init__()
         self.learning_rate = learning_rate
         self.max_depth = max_depth
@@ -32,19 +33,22 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         self._X_buffer = np.array([])
         self._y_buffer = np.array([])
 
-        self._max_buffer = max_buffer
-        self._pre_train = pre_train
-        self._ratio_unsampled = ratio_unsampled
+        self.max_buffer = max_buffer
+        self.pre_train = pre_train
+        self.ratio_unsampled = ratio_unsampled
         self._X_small_buffer = np.array([])
         self._y_small_buffer = np.array([])
         self._samples_seen = 0
         self._model_idx = 0
-        self._small_window_size = small_window_size
+        self.small_window_size = small_window_size
         self._count_buffer = 0
         self._main_model = "model"
         self._temp_model = "temp"
 
         self._configure()
+
+    def _more_tags(self):
+        return {"pairwise": False}
 
     def _configure(self):
         self._reset_window_size()
@@ -53,7 +57,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
             "objective": "binary:logistic",
             "eta": self.learning_rate,
             "eval_metric": "logloss",
-            "max_depth": self.max_depth}
+            "max_depth": self.max_depth,
+        }
 
     def reset(self):
         self._first_run = True
@@ -88,23 +93,27 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         return self
 
     def _change_small_window(self, npArrX, npArrY):
-        if npArrX.shape[0] < self._small_window_size:
+        if npArrX.shape[0] < self.small_window_size:
             sizeToRemove = 0
             nextSize = self._X_small_buffer.shape[0] + npArrX.shape[0]
-            if nextSize > self._small_window_size:
-                sizeToRemove = nextSize - self._small_window_size
-            #deleta os dados velhos
+            if nextSize > self.small_window_size:
+                sizeToRemove = nextSize - self.small_window_size
+            # deleta os dados velhos
             delete_idx = [i for i in range(sizeToRemove)]
 
             if len(delete_idx) > 0:
-                self._X_small_buffer = np.delete(self._X_small_buffer, delete_idx, axis=0)
-                self._y_small_buffer = np.delete(self._y_small_buffer, delete_idx, axis=0)
-            
+                self._X_small_buffer = np.delete(
+                    self._X_small_buffer, delete_idx, axis=0
+                )
+                self._y_small_buffer = np.delete(
+                    self._y_small_buffer, delete_idx, axis=0
+                )
+
             self._X_small_buffer = np.concatenate((self._X_small_buffer, npArrX))
             self._y_small_buffer = np.concatenate((self._y_small_buffer, npArrY))
         else:
-            self._X_small_buffer = npArrX[0:self._small_window_size]
-            self._y_small_buffer = npArrY[0:self._small_window_size]
+            self._X_small_buffer = npArrX[0 : self.small_window_size]
+            self._y_small_buffer = npArrY[0 : self.small_window_size]
 
     def _unlabeled_fit(self):
         # unlabeled = map(lambda x: x != 0 and x != 1, self._y_buffer)
@@ -117,7 +126,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         for i in range(len(self._X_buffer)):
             currentY = self._y_buffer[i]
 
-            max_size = int(self._ratio_unsampled * len(self._X_buffer))
+            max_size = int(self.ratio_unsampled * len(self._X_buffer))
             # print(max_size)
             if max_size > i:
                 unlabeled.append(self._X_buffer[i])
@@ -136,7 +145,9 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         npUnlabeled = np.array(unlabeled)
         if npArrX.shape[0] > 6:
             if npUnlabeled.shape[0] > 0:
-                nbrs = KNeighborsClassifier(n_neighbors=3, algorithm='ball_tree').fit(self._X_small_buffer, self._y_small_buffer)
+                nbrs = KNeighborsClassifier(n_neighbors=3, algorithm="ball_tree").fit(
+                    self._X_small_buffer, self._y_small_buffer
+                )
 
                 proba = nbrs.predict_proba(npUnlabeled)
 
@@ -145,7 +156,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
                     otherIndex = biggerIndex == 0 and 1 or 0
                     margim = proba[j][biggerIndex] - proba[j][otherIndex]
 
-                    if (margim > 0.5):
+                    if margim > 0.5:
                         npArrXNew = np.array([npUnlabeled[j]])
                         npArrYNew = np.array([biggerIndex])
                         npArrX = np.concatenate((npArrX, npArrXNew))
@@ -154,7 +165,6 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         # print(len(npArrX))
         # print(len(self._X_small_buffer))
         return (npArrX, npArrY)
-
 
     def _partial_fit(self, X, y):
         if self._first_run:
@@ -170,9 +180,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
             self._count_buffer = self._count_buffer + 1
             npArrX, npArrY = self._unlabeled_fit()
             if npArrX.shape[0] > 0:
-                self._train_on_mini_batch(X=npArrX,
-                                        y=npArrY)
-                                    
+                self._train_on_mini_batch(X=npArrX, y=npArrY)
+
             delete_idx = [i for i in range(self.window_size)]
             self._X_buffer = np.delete(self._X_buffer, delete_idx, axis=0)
             self._y_buffer = np.delete(self._y_buffer, delete_idx, axis=0)
@@ -197,34 +206,40 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
 
     def _train_on_mini_batch(self, X, y):
         booster = self._train_booster(X, y, self._main_model, self._booster)
-        inside_pre_train = self._max_buffer - self._count_buffer
-        if inside_pre_train >= self._pre_train:
-            temp_booster = self._train_booster(X, y, self._temp_model, self._temp_booster)
+        inside_pre_train = self.max_buffer - self._count_buffer
+        if inside_pre_train >= self.pre_train:
+            temp_booster = self._train_booster(
+                X, y, self._temp_model, self._temp_booster
+            )
             self._temp_booster = temp_booster
 
-        if self._count_buffer >= self._max_buffer:
+        if self._count_buffer >= self.max_buffer:
             booster = self._temp_booster
             self._temp_booster = None
             self._count_buffer = 0
-            self._temp_model,self._main_model = self._main_model,self._temp_model
-        
+            self._temp_model, self._main_model = self._main_model, self._temp_model
+
         # Update ensemble
         self._booster = booster
 
     def _train_booster(self, X: np.ndarray, y: np.ndarray, fileName, currentBooster):
         d_mini_batch_train = xgb.DMatrix(X, y.astype(int))
-        
+
         if currentBooster:
-            booster = xgb.train(params=self._boosting_params,
-                                dtrain=d_mini_batch_train,
-                                num_boost_round=1,
-                                xgb_model=fileName)
+            booster = xgb.train(
+                params=self._boosting_params,
+                dtrain=d_mini_batch_train,
+                num_boost_round=1,
+                xgb_model=fileName,
+            )
             booster.save_model(fileName)
         else:
-            booster = xgb.train(params=self._boosting_params,
-                                dtrain=d_mini_batch_train,
-                                num_boost_round=1,
-                                verbose_eval=False)
+            booster = xgb.train(
+                params=self._boosting_params,
+                dtrain=d_mini_batch_train,
+                num_boost_round=1,
+                verbose_eval=False,
+            )
             booster.save_model(fileName)
         return booster
 
@@ -257,5 +272,4 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         """
         Not implemented for this method.
         """
-        raise NotImplementedError(
-            "predict_proba is not implemented for this method.")
+        raise NotImplementedError("predict_proba is not implemented for this method.")
