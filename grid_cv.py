@@ -40,6 +40,7 @@ elif argumentos.CLASSIFICADOR == "incremental":
         "learning_rate": [0.01, 0.05, 0.1, 0.5],
         "max_window_size": [512, 1024, 2048, 4096, 8192],
         "min_window_size": [4, 8, 16],
+        "reset_on_model_switch": [True, False],
     }
 elif argumentos.CLASSIFICADOR == "arf":
     parameter_grid = {"n_estimators": [5, 10, 20, 30]}
@@ -54,7 +55,7 @@ gs_cv.fit(X_train, y_train)
 
 salvar_resultados.salvar_resultados_gridsearch(gs_cv.cv_results_, gs_cv.best_params_)
 
-
+# CUSTOM GRID SEARCH
 # Grid search CV
 # def grid_search_cross_val(param_grid, X_train, y_train, param_i=0, params={}):
 #     param = list(param_grid.keys())[param_i]

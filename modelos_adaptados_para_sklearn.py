@@ -1,3 +1,6 @@
+# Esses modelos foram adaptados para que tenham compatibilidade com GridSearchCV do sklearn.
+# Sem essas adaptações, o GridSearchCV dará erro
+
 from skmultiflow.trees import HoeffdingAdaptiveTreeClassifier
 from skmultiflow.meta import AdaptiveRandomForestClassifier
 

@@ -18,6 +18,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         small_window_size=0,
         max_buffer=5,
         pre_train=2,
+        reset_on_model_switch=True,  # Reseta a janela se houver a troca do modelo MAIN pra TEMP
     ):
         super().__init__()
         self.learning_rate = learning_rate
@@ -36,6 +37,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         self.max_buffer = max_buffer
         self.pre_train = pre_train
         self.ratio_unsampled = ratio_unsampled
+        self.reset_on_model_switch = reset_on_model_switch
         self._X_small_buffer = np.array([])
         self._y_small_buffer = np.array([])
         self._samples_seen = 0
@@ -205,7 +207,6 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         self.window_size = self._dynamic_window_size
 
     def _train_on_mini_batch(self, X, y):
-        # inside_pre_train = self.max_buffer - self._count_buffer
         if self._count_buffer >= self._inside_pre_train:
             temp_booster = self._train_booster(
                 X, y, self._temp_model, self._temp_booster
@@ -217,6 +218,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
             self._temp_booster = None
             self._count_buffer = 0
             self._temp_model, self._main_model = self._main_model, self._temp_model
+            if self.reset_on_model_switch:
+                self._reset_window_size()
         else:
             booster = self._train_booster(X, y, self._main_model, self._booster)
 
