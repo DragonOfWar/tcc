@@ -4,8 +4,10 @@ import salvar_resultados
 
 from adaptive_xgboost import AdaptiveXGBoostClassifier
 from adaptive_semiV2 import AdaptiveSemi
-from skmultiflow.trees import HoeffdingAdaptiveTreeClassifier
-from skmultiflow.meta import AdaptiveRandomForestClassifier
+from modelos_adaptados_para_sklearn import (
+    AdaptiveRandomForestClassifierA,
+    HoeffdingAdaptiveTreeClassifierA,
+)
 from sklearn.model_selection import train_test_split, GridSearchCV
 
 
@@ -19,12 +21,12 @@ def _criar_modelo(**kwargs):
             **kwargs,
         )
     elif argumentos.CLASSIFICADOR == "arf":
-        return AdaptiveRandomForestClassifier(**kwargs)
+        return AdaptiveRandomForestClassifierA(**kwargs)
     elif argumentos.CLASSIFICADOR == "hat":
-        return HoeffdingAdaptiveTreeClassifier(**kwargs)
+        return HoeffdingAdaptiveTreeClassifierA(**kwargs)
 
 
-parameter_grid = None
+parameter_grid = {}
 if argumentos.CLASSIFICADOR == "axgb":
     parameter_grid = {
         "max_depth": [1, 5, 10, 15],

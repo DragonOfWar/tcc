@@ -16,7 +16,7 @@ parser.add_argument(
     "-d",
     help="Nome do dataset",
     type=str,
-    default="sea",
+    default="sea_a",
 )
 parser.add_argument(
     "--hiperparametros",
