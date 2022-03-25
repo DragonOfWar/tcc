@@ -5,11 +5,7 @@ import xgboost as xgb
 from skmultiflow.core.base import BaseSKMObject, ClassifierMixin
 from skmultiflow.drift_detection import ADWIN
 from skmultiflow.utils import get_dimensions
-import threading
-import concurrent.futures
-import multiprocessing
 from pathos.multiprocessing import ProcessPool as Pool
-import time
 
 
 def _thread(args):

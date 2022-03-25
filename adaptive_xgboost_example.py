@@ -1,14 +1,12 @@
 import salvar_resultados
 import argumentos
-import numpy as np
 
 from adaptive_xgboost import AdaptiveXGBoostClassifier
 from adaptive_semiV2 import AdaptiveSemi
 from skmultiflow.meta import AdaptiveRandomForestClassifier
 from skmultiflow.trees import HoeffdingAdaptiveTreeClassifier
 from skmultiflow.evaluation import EvaluatePrequential
-from sklearn.model_selection import train_test_split
-from skmultiflow.data import DataStream
+from skmultiflow.data import FileStream
 
 
 # # Adaptive XGBoost classifier parameters
@@ -37,13 +35,13 @@ from skmultiflow.data import DataStream
 # pre_train = 15
 
 # Criar fluxo de dados
-dataset = np.loadtxt(f"datasets/{argumentos.DATASET}.csv", delimiter=",", skiprows=1)
-X, y = dataset[:, :-1], dataset[:, -1]
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, train_size=0.3, random_state=1
-)
-stream = DataStream(X_test, y_test, name=f"{argumentos.DATASET}.csv")
-# stream = FileStream(f"datasets/{argumentos.DATASET}.csv")
+# dataset = np.loadtxt(f"datasets/{argumentos.DATASET}.csv", delimiter=",", skiprows=1)
+# X, y = dataset[:, :-1], dataset[:, -1]
+# X_train, X_test, y_train, y_test = train_test_split(
+#     X, y, train_size=0.3, random_state=1
+# )
+# stream = DataStream(X_test, y_test, name=f"{argumentos.DATASET}.csv")
+stream = FileStream(f"datasets/{argumentos.DATASET}.csv")
 
 
 # Criar modelo
@@ -66,6 +64,10 @@ evaluator = EvaluatePrequential(
     metrics=["accuracy", "running_time", "kappa"],
 )
 
-evaluator.evaluate(stream=stream, model=model, model_names=[argumentos.CLASSIFICADOR])
+evaluator.evaluate(
+    stream=stream,
+    model=model,
+    model_names=[argumentos.CLASSIFICADOR],
+)
 
 salvar_resultados.salvar_resultados_normal()
