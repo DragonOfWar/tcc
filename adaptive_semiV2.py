@@ -1,12 +1,10 @@
 import numpy as np
 
 import xgboost as xgb
-import random
 
 from skmultiflow.core.base import BaseSKMObject, ClassifierMixin
 from skmultiflow.utils import get_dimensions
 from sklearn.neighbors import KNeighborsClassifier
-import os
 
 
 class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
@@ -32,6 +30,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         self._drift_detector = None
         self._X_buffer = np.array([])
         self._y_buffer = np.array([])
+
+        self._inside_pre_train = max_buffer - pre_train
 
         self.max_buffer = max_buffer
         self.pre_train = pre_train
@@ -205,9 +205,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         self.window_size = self._dynamic_window_size
 
     def _train_on_mini_batch(self, X, y):
-        booster = self._train_booster(X, y, self._main_model, self._booster)
-        inside_pre_train = self.max_buffer - self._count_buffer
-        if inside_pre_train >= self.pre_train:
+        # inside_pre_train = self.max_buffer - self._count_buffer
+        if self._count_buffer >= self._inside_pre_train:
             temp_booster = self._train_booster(
                 X, y, self._temp_model, self._temp_booster
             )
@@ -218,6 +217,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
             self._temp_booster = None
             self._count_buffer = 0
             self._temp_model, self._main_model = self._main_model, self._temp_model
+        else:
+            booster = self._train_booster(X, y, self._main_model, self._booster)
 
         # Update ensemble
         self._booster = booster
