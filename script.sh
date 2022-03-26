@@ -9,15 +9,16 @@ DATASET_GS="agr_a"
 CLASSIFICADORES=("arf" "incremental" "axgb" "hat")
 DIR_RESULTADOS_GS="resultados_gridsearch"
 
+mkdir -p logs
 
 for classificador in ${CLASSIFICADORES[@]}
 do
-    $COMANDO_PYTHON $ARQUIVO_GRIDSEARCH --classificador=$classificador --dataset=$DATASET_GS
+    $COMANDO_PYTHON $ARQUIVO_GRIDSEARCH --classificador=$classificador --dataset=$DATASET_GS &> logs/output_${classificador}_gs.log
     for dataset in ${DATASETS[@]}
     do
         for x in $(seq $QNT_X)
         do
-            $COMANDO_PYTHON $ARQUIVO_TESTES --classificador=$classificador --dataset=$dataset --hiperparametros="$DIR_RESULTADOS_GS/melhor_hp_${classificador}_$DATASET_GS.json" --iteracao=$x
+            $COMANDO_PYTHON $ARQUIVO_TESTES --classificador=$classificador --dataset=$dataset --hiperparametros="$DIR_RESULTADOS_GS/melhor_hp_${classificador}_$DATASET_GS.json" --iteracao=$x &> logs/output_${classificador}_${dataset}_$x.log
         done
     done
 done
