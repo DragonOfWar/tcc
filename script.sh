@@ -3,7 +3,7 @@
 COMANDO_PYTHON="python"
 ARQUIVO_TESTES="adaptive_xgboost_example.py"
 ARQUIVO_GRIDSEARCH="grid_cv.py"
-QNT_X=1
+QNT_X=10
 DATASETS=("sea_a" "sea_g" "airlines" "elec" "agr_a" "agr_g" "hyper_f")
 DATASET_GS="agr_a"
 CLASSIFICADORES=("arf" "incremental" "axgb" "hat")
