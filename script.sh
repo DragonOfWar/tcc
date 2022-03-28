@@ -13,12 +13,15 @@ mkdir -p logs
 
 for classificador in ${CLASSIFICADORES[@]}
 do
-    $COMANDO_PYTHON $ARQUIVO_GRIDSEARCH --classificador=$classificador --dataset=$DATASET_GS &> logs/output_${classificador}_gs.log
+    echo "Executando GridSearch no classificador $classificador"
+    $COMANDO_PYTHON $ARQUIVO_GRIDSEARCH --classificador=$classificador --dataset=$DATASET_GS 
+    echo "Realizando experimentos"
     for dataset in ${DATASETS[@]}
     do
         for x in $(seq $QNT_X)
         do
-            $COMANDO_PYTHON $ARQUIVO_TESTES --classificador=$classificador --dataset=$dataset --hiperparametros="$DIR_RESULTADOS_GS/melhor_hp_${classificador}_$DATASET_GS.json" --iteracao=$x &> logs/output_${classificador}_${dataset}_$x.log
+            echo "Experimento usando $dataset ($x/$QNT_X)"
+            $COMANDO_PYTHON $ARQUIVO_TESTES --classificador=$classificador --dataset=$dataset --hiperparametros="$DIR_RESULTADOS_GS/melhor_hp_${classificador}_$DATASET_GS.json" --iteracao=$x 
         done
     done
 done
