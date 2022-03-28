@@ -45,14 +45,18 @@ elif argumentos.CLASSIFICADOR == "incremental":
 elif argumentos.CLASSIFICADOR == "arf":
     parameter_grid = {"n_estimators": [5, 10, 20, 30]}
 
+print(f"Carregando dataset {argumentos.DATASET}")
 dataset = np.loadtxt(f"datasets/{argumentos.DATASET}.csv", delimiter=",", skiprows=1)
+print(f"Configurando dataset")
 X, y = dataset[:, :-1], dataset[:, -1]
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, train_size=0.3, random_state=1
 )
 gs_cv = GridSearchCV(_criar_modelo(), parameter_grid)
+print(f"Realizando GridSearchCV")
 gs_cv.fit(X_train, y_train)
 
+print("Salvando resultados")
 salvar_resultados.salvar_resultados_gridsearch(gs_cv.cv_results_, gs_cv.best_params_)
 
 # CUSTOM GRID SEARCH
