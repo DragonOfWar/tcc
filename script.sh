@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMANDO_PYTHON="python"
+COMANDO_PYTHON="python3"
 ARQUIVO_TESTES="adaptive_xgboost_example.py"
 ARQUIVO_GRIDSEARCH="grid_cv.py"
 QNT_X=10
