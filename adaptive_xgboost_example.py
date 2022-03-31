@@ -57,7 +57,7 @@ elif argumentos.CLASSIFICADOR == "hat":
 
 evaluator = EvaluatePrequential(
     pretrain_size=0,
-    # max_samples=1000,
+    max_samples=1_000_000,
     # batch_size=200,
     output_file=salvar_resultados.caminho_resultado_raw,
     show_plot=False,
