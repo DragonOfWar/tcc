@@ -1,4 +1,5 @@
 import argparse
+from ast import parse
 import json
 import sys
 
@@ -32,6 +33,13 @@ parser.add_argument(
     type=int,
     default=1,
 )
+parser.add_argument(
+    "--maxregistros",
+    "-m",
+    help="Máximo do registros",
+    type=int,
+    default=1_000_000,
+)
 
 args = parser.parse_args()
 
@@ -39,6 +47,7 @@ CLASSIFICADOR = args.classificador
 DATASET = args.dataset
 HIPER_PARAMETROS = {}
 ITERACAO = args.iteracao
+MAX_REGISTROS = args.maxregistros
 
 # Carregar arquivo de hiperparametros
 if args.hiperparametros != "":
