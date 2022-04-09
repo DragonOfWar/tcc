@@ -48,7 +48,10 @@ elif argumentos.CLASSIFICADOR == "arf":
 print(f"Carregando dataset {argumentos.DATASET}")
 dataset = np.loadtxt(f"datasets/{argumentos.DATASET}.csv", delimiter=",", skiprows=1)
 print(f"Configurando dataset")
-X, y = dataset[:, :-1], dataset[:, -1]
+X, y = (
+    dataset[: argumentos.MAX_REGISTROS, :-1],
+    dataset[: argumentos.MAX_REGISTROS, -1],
+)
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, train_size=0.3, random_state=1
 )

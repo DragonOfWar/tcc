@@ -6,7 +6,7 @@ from adaptive_semiV2 import AdaptiveSemi
 from skmultiflow.meta import AdaptiveRandomForestClassifier
 from skmultiflow.trees import HoeffdingAdaptiveTreeClassifier
 from skmultiflow.evaluation import EvaluatePrequential
-from skmultiflow.data import FileStream
+from data_stream_generators import get_dataset
 
 
 # # Adaptive XGBoost classifier parameters
@@ -41,7 +41,8 @@ from skmultiflow.data import FileStream
 #     X, y, train_size=0.3, random_state=1
 # )
 # stream = DataStream(X_test, y_test, name=f"{argumentos.DATASET}.csv")
-stream = FileStream(f"datasets/{argumentos.DATASET}.csv")
+# stream = FileStream(f"datasets/{argumentos.DATASET}.csv")
+stream = get_dataset(argumentos.DATASET, argumentos.MAX_REGISTROS)
 
 
 # Criar modelo
@@ -57,7 +58,7 @@ elif argumentos.CLASSIFICADOR == "hat":
 
 evaluator = EvaluatePrequential(
     pretrain_size=0,
-    max_samples=1_000_000,
+    max_samples=argumentos.MAX_REGISTROS,
     # batch_size=200,
     output_file=salvar_resultados.caminho_resultado_raw,
     show_plot=False,
