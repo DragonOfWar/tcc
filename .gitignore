@@ -135,3 +135,5 @@ model
 temp
 resultados/
 resultados_raw/
+graficos_acuracias/
+graficos_kappa/
