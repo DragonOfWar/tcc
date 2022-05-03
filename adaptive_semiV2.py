@@ -44,8 +44,6 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         self._model_idx = 0
         self.small_window_size = small_window_size
         self._count_buffer = 0
-        self._main_model = "model"
-        self._temp_model = "temp"
 
         self._configure()
 
@@ -208,25 +206,18 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
 
     def _train_on_mini_batch(self, X, y):
         if self._count_buffer >= self._inside_pre_train:
-            temp_booster = self._train_booster(
-                X, y, self._temp_model, self._temp_booster
-            )
-            self._temp_booster = temp_booster
+            self._temp_booster = self._train_booster(X, y, self._temp_booster)
 
         if self._count_buffer >= self.max_buffer:
-            booster = self._temp_booster
+            self._booster = self._temp_booster
             self._temp_booster = None
             self._count_buffer = 0
-            self._temp_model, self._main_model = self._main_model, self._temp_model
             if self.reset_on_model_switch:
                 self._reset_window_size()
         else:
-            booster = self._train_booster(X, y, self._main_model, self._booster)
+            self._booster = self._train_booster(X, y, self._booster)
 
-        # Update ensemble
-        self._booster = booster
-
-    def _train_booster(self, X: np.ndarray, y: np.ndarray, fileName, currentBooster):
+    def _train_booster(self, X: np.ndarray, y: np.ndarray, currentBooster):
         d_mini_batch_train = xgb.DMatrix(X, y.astype(int))
 
         if currentBooster:
@@ -234,9 +225,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
                 params=self._boosting_params,
                 dtrain=d_mini_batch_train,
                 num_boost_round=1,
-                xgb_model=fileName,
+                xgb_model=currentBooster,
             )
-            booster.save_model(fileName)
         else:
             booster = xgb.train(
                 params=self._boosting_params,
@@ -244,7 +234,6 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
                 num_boost_round=1,
                 verbose_eval=False,
             )
-            booster.save_model(fileName)
         return booster
 
     def predict(self, X):
