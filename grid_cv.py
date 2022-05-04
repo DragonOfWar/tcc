@@ -1,5 +1,6 @@
 import argumentos
 import numpy as np
+from custom_grid_search import CustomGridSearch
 import salvar_resultados
 
 from adaptive_xgboost import AdaptiveXGBoostClassifier
@@ -55,12 +56,12 @@ X, y = (
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, train_size=0.3, random_state=1
 )
-gs_cv = GridSearchCV(_criar_modelo(), parameter_grid)
+gs_cv = CustomGridSearch(parameter_grid)
 print(f"Realizando GridSearchCV")
-gs_cv.fit(X_train, y_train)
+gs_cv.exec(X_train, y_train, _criar_modelo)
 
 print("Salvando resultados")
-salvar_resultados.salvar_resultados_gridsearch(gs_cv.cv_results_, gs_cv.best_params_)
+salvar_resultados.salvar_resultados_gridsearch(gs_cv.combinacoes_parametros, gs_cv.best)
 
 # CUSTOM GRID SEARCH
 # Grid search CV
