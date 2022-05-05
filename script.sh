@@ -12,10 +12,23 @@ DIR_RESULTADOS_GS="resultados_gridsearch"
 
 mkdir -p logs
 
+EXECUTAR_GS=false
+for i in $(seq $#)
+do
+    if [ ${!i} -eq "--sem_gs" ]
+    then
+        EXECUTAR_GS=true
+    fi
+done
+
+
 for classificador in ${CLASSIFICADORES[@]}
 do
-    echo "Executando GridSearch no classificador $classificador"
-    $COMANDO_PYTHON $ARQUIVO_GRIDSEARCH --classificador=$classificador --dataset=$DATASET_GS --maxregistros=$MAX_REGISTROS
+    if [ "$EXECUTAR_GS" = true ]
+    then
+        echo "Executando GridSearch no classificador $classificador"
+        $COMANDO_PYTHON $ARQUIVO_GRIDSEARCH --classificador=$classificador --dataset=$DATASET_GS --maxregistros=$MAX_REGISTROS
+    fi
     echo "Realizando experimentos"
     for dataset in ${DATASETS[@]}
     do
