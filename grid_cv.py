@@ -1,4 +1,5 @@
 import argumentos
+from criar_classificador import criar_classficiador
 import salvar_resultados
 
 from adaptive_xgboost import AdaptiveXGBoostClassifier
@@ -10,17 +11,6 @@ from modelos_adaptados_para_sklearn import (
     HoeffdingAdaptiveTreeClassifierA,
 )
 from sklearn.model_selection import GridSearchCV
-
-
-def _criar_modelo(**kwargs):
-    if argumentos.CLASSIFICADOR == "axgb":
-        return AdaptiveXGBoostClassifier(**kwargs)
-    elif argumentos.CLASSIFICADOR == "incremental":
-        return AdaptiveSemi(**kwargs, min_window_size=1)
-    elif argumentos.CLASSIFICADOR == "arf":
-        return AdaptiveRandomForestClassifierA(**kwargs)
-    elif argumentos.CLASSIFICADOR == "hat":
-        return HoeffdingAdaptiveTreeClassifierA(**kwargs)
 
 
 parameter_grid = {}
@@ -47,7 +37,7 @@ print(f"Carregando dataset {argumentos.DATASET}")
 dataset = AGRAWALGenerator(random_state=1).next_sample(argumentos.MAX_REGISTROS)
 print(f"Realizando GridSearchCV")
 
-gs_cv = GridSearchCV(_criar_modelo(), parameter_grid)
+gs_cv = GridSearchCV(criar_classficiador(), parameter_grid)
 gs_cv.fit(dataset[0], dataset[1])
 
 print("Salvando resultados")

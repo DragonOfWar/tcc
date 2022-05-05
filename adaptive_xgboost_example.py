@@ -1,10 +1,6 @@
 import salvar_resultados
 import argumentos
-
-from adaptive_xgboost import AdaptiveXGBoostClassifier
-from adaptive_semiV2 import AdaptiveSemi
-from skmultiflow.meta import AdaptiveRandomForestClassifier
-from skmultiflow.trees import HoeffdingAdaptiveTreeClassifier
+from criar_classificador import criar_classficiador
 from skmultiflow.evaluation import EvaluatePrequential
 from data_stream_generators import get_dataset
 
@@ -46,15 +42,7 @@ stream = get_dataset(argumentos.DATASET, argumentos.MAX_REGISTROS)
 
 
 # Criar modelo
-model = None
-if argumentos.CLASSIFICADOR == "axgb":
-    model = AdaptiveXGBoostClassifier(**argumentos.HIPER_PARAMETROS)
-elif argumentos.CLASSIFICADOR == "incremental":
-    model = AdaptiveSemi(**argumentos.HIPER_PARAMETROS)
-elif argumentos.CLASSIFICADOR == "arf":
-    model = AdaptiveRandomForestClassifier(**argumentos.HIPER_PARAMETROS)
-elif argumentos.CLASSIFICADOR == "hat":
-    model = HoeffdingAdaptiveTreeClassifier(**argumentos.HIPER_PARAMETROS)
+model = criar_classficiador(**argumentos.HIPER_PARAMETROS)
 
 evaluator = EvaluatePrequential(
     pretrain_size=0,
