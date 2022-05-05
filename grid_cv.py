@@ -1,15 +1,7 @@
 import argumentos
-from criar_classificador import criar_classficiador
 import salvar_resultados
-
-from adaptive_xgboost import AdaptiveXGBoostClassifier
-from adaptive_semiV2 import AdaptiveSemi
+from criar_classificador import criar_classficiador
 from skmultiflow.data import AGRAWALGenerator
-
-from modelos_adaptados_para_sklearn import (
-    AdaptiveRandomForestClassifierA,
-    HoeffdingAdaptiveTreeClassifierA,
-)
 from sklearn.model_selection import GridSearchCV
 
 

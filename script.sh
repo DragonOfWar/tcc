@@ -12,15 +12,14 @@ DIR_RESULTADOS_GS="resultados_gridsearch"
 
 mkdir -p logs
 
-EXECUTAR_GS=false
+EXECUTAR_GS=true
 for i in $(seq $#)
 do
-    if [ ${!i} -eq "--sem_gs" ]
+    if [ "${!i}" = "--sem-gs" ]
     then
-        EXECUTAR_GS=true
+        EXECUTAR_GS=false
     fi
 done
-
 
 for classificador in ${CLASSIFICADORES[@]}
 do
