@@ -3,11 +3,17 @@ import scikit_posthocs as sp
 import numpy as np
 import csv
 import os
+import sys
 from scipy import stats
+
+NAO_FAZER_GRAFICO = "--semgrafico" in sys.argv
+NAO_FAZER_FRIEDMAN = "--semfriedman" in sys.argv
+# Executa acuracia e kappa pelo resultados_raw ao invés pelo resultados (não ira usar as medias)
+FRIEDMAN_TOTAL = "--friedmantotal" in sys.argv
 
 # Config
 QNT_ITERACOES = 5
-CLASSIFICADORES = ["axgb", "incremental", "hat", "arf"]
+CLASSIFICADORES = ["incremental", "incremental_r", "hat", "arf"]
 DATASETS = ["agr_a", "agr_g", "airlines", "elec", "hyper_f", "sea_a", "sea_g"]
 
 # Diretorios
@@ -57,42 +63,65 @@ def gerar_graficos(coluna, dir, nome):
             plt.clf()
 
 
-gerar_graficos(2, CAMINHO_FIGURAS_ACURACIAS, "acuracia")
-gerar_graficos(4, CAMINHO_FIGURAS_KAPPA, "kappa")
+if not NAO_FAZER_GRAFICO:
+    gerar_graficos(2, CAMINHO_FIGURAS_ACURACIAS, "acuracia")
+    gerar_graficos(4, CAMINHO_FIGURAS_KAPPA, "kappa")
 
-# Executar teste de friedman-nemenyi nas acuracias
-acuracias = {c: [] for c in CLASSIFICADORES}
-kappas = {c: [] for c in CLASSIFICADORES}
-tempos = {c: [] for c in CLASSIFICADORES}
+if not NAO_FAZER_FRIEDMAN:
+    # Executar teste de friedman-nemenyi nas acuracias
+    acuracias = {c: [] for c in CLASSIFICADORES}
+    kappas = {c: [] for c in CLASSIFICADORES}
+    tempos = {c: [] for c in CLASSIFICADORES}
 
-COLUNA_ACURACIA = 1
-COLUNA_KAPPA = 2
-COLUNA_TEMPO = 5
+    COLUNA_ACURACIA = 2
+    COLUNA_KAPPA = 4
+    COLUNA_TEMPO = 5
 
-# Ler resultados
-for d in DATASETS:
-    for c in CLASSIFICADORES:
-        with open(f"{CAMINHO_RESULTADOS}/resultados_{c}_{d}.csv") as csvfile:
-            csvr = csv.reader(csvfile, delimiter=",")
-            next(csvr)  # Descartar primeira linha (cabeçalho)
-            for l in csvr:
-                acuracias[c].append(l[COLUNA_ACURACIA])
-                kappas[c].append(l[COLUNA_KAPPA])
-                tempos[c].append(l[COLUNA_TEMPO])
+    # Ler resultados
+    for d in DATASETS:
+        for c in CLASSIFICADORES:
+            if FRIEDMAN_TOTAL:
+                with open(f"{CAMINHO_RESULTADOS}/resultados_{c}_{d}.csv") as csvfile:
+                    csvr = csv.reader(csvfile, delimiter=",")
+                    next(csvr)  # Descartar primeira linha (cabeçalho)
+                    for l in csvr:
+                        tempos[c].append(l[COLUNA_TEMPO])
+                for i in range(1, QNT_ITERACOES):
+                    with open(
+                        f"{CAMINHO_RESULTADOS_RAW}/resultados_{c}_{d}_{i}.csv", "r"
+                    ) as csvfile:
+                        csvr = csv.reader(
+                            # Preprocessar o csv pra remover os comentarios
+                            filter(lambda l: l[0] != "#", csvfile),
+                            delimiter=",",
+                        )
+                        next(csvr)  # ignorar primeira linha (cabeçalho)
+                        for l in csvr:
+                            acuracias[c].append(l[COLUNA_ACURACIA])
+                            kappas[c].append(l[COLUNA_KAPPA])
+                continue
 
-# Teste
-fsr_a = stats.friedmanchisquare(*list(acuracias.values()))
-fsr_k = stats.friedmanchisquare(*list(kappas.values()))
-fsr_t = stats.friedmanchisquare(*list(tempos.values()))
+            with open(f"{CAMINHO_RESULTADOS}/resultados_{c}_{d}.csv") as csvfile:
+                csvr = csv.reader(csvfile, delimiter=",")
+                next(csvr)  # Descartar primeira linha (cabeçalho)
+                for l in csvr:
+                    acuracias[c].append(l[COLUNA_ACURACIA])
+                    kappas[c].append(l[COLUNA_KAPPA])
+                    tempos[c].append(l[COLUNA_TEMPO])
 
-print("FSR Acuracias: ", fsr_a)
-print("FSR Kappa: ", fsr_k)
-print("FSR Tempos: ", fsr_t)
+    # Teste
+    fsr_a = stats.friedmanchisquare(*list(acuracias.values()))
+    fsr_k = stats.friedmanchisquare(*list(kappas.values()))
+    fsr_t = stats.friedmanchisquare(*list(tempos.values()))
 
-data_a = np.array(list(acuracias.values()))
-data_k = np.array(list(kappas.values()))
-data_t = np.array(list(tempos.values()))
+    print("FSR Acuracias: ", fsr_a)
+    print("FSR Kappa: ", fsr_k)
+    print("FSR Tempos: ", fsr_t)
 
-print(sp.posthoc_nemenyi_friedman(data_a.T))
-print(sp.posthoc_nemenyi_friedman(data_k.T))
-print(sp.posthoc_nemenyi_friedman(data_t.T))
+    data_a = np.array(list(acuracias.values()))
+    data_k = np.array(list(kappas.values()))
+    data_t = np.array(list(tempos.values()))
+
+    print(sp.posthoc_nemenyi_friedman(data_a.T))
+    print(sp.posthoc_nemenyi_friedman(data_k.T))
+    print(sp.posthoc_nemenyi_friedman(data_t.T))
