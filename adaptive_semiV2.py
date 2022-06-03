@@ -5,6 +5,7 @@ import xgboost as xgb
 from skmultiflow.core.base import BaseSKMObject, ClassifierMixin
 from skmultiflow.utils import get_dimensions
 from sklearn.neighbors import KNeighborsClassifier
+from skmultiflow.drift_detection import ADWIN
 
 
 class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
@@ -18,13 +19,15 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         small_window_size=0,
         max_buffer=5,
         pre_train=2,
-        reset_on_model_switch=True,  # Reseta a janela se houver a troca do modelo MAIN pra TEMP
+        reset_on_model_switch=True,
+        detect_drift=False,  # Reseta a janela se houver a troca do modelo MAIN pra TEMP
     ):
         super().__init__()
         self.learning_rate = learning_rate
         self.max_depth = max_depth
         self.max_window_size = max_window_size
         self.min_window_size = min_window_size
+        self.detect_drift = detect_drift
         self._first_run = True
         self._booster = None
         self._temp_booster = None
@@ -59,6 +62,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
             "eval_metric": "logloss",
             "max_depth": self.max_depth,
         }
+        if self.detect_drift:
+            self._drift_detector = ADWIN()
 
     def reset(self):
         self._first_run = True
@@ -188,6 +193,13 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
 
             # Check window size and adjust it if necessary
             self._adjust_window_size()
+
+        if self.detect_drift and self._drift_detector is not None:
+            correctly_classifies = self.predict(X) == y
+            self._drift_detector.add_element(int(not correctly_classifies))
+            if self._drift_detector.detected_change():
+                print("Drift detected! Resetting window")
+                self._reset_window_size()
 
     def _adjust_window_size(self):
         if self._dynamic_window_size < self.max_window_size:

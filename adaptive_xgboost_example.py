@@ -38,7 +38,12 @@ from data_stream_generators import get_dataset
 # )
 # stream = DataStream(X_test, y_test, name=f"{argumentos.DATASET}.csv")
 # stream = FileStream(f"datasets/{argumentos.DATASET}.csv")
-stream = get_dataset(argumentos.DATASET, argumentos.MAX_REGISTROS)
+stream = get_dataset(
+    argumentos.DATASET,
+    argumentos.MAX_REGISTROS,
+    argumentos.RANDOM_STATE,
+    argumentos.QNT_DRIFTS,
+)
 
 
 # Criar modelo
@@ -49,7 +54,7 @@ evaluator = EvaluatePrequential(
     max_samples=argumentos.MAX_REGISTROS,
     # batch_size=200,
     output_file=salvar_resultados.caminho_resultado_raw,
-    show_plot=False,
+    show_plot=True,
     metrics=["accuracy", "running_time", "kappa"],
 )
 

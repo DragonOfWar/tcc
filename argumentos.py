@@ -40,6 +40,21 @@ parser.add_argument(
     type=int,
     default=1_000_000,
 )
+parser.add_argument(
+    "--randomstate",
+    "-r",
+    help="Seed do gerador de datasets",
+    type=int,
+    default=1,
+)
+parser.add_argument(
+    "--qntdrifts",
+    "-q",
+    help="Quantidade de drifts",
+    type=int,
+    default=3,
+)
+
 
 args = parser.parse_args()
 
@@ -48,6 +63,8 @@ DATASET = args.dataset
 HIPER_PARAMETROS = {}
 ITERACAO = args.iteracao
 MAX_REGISTROS = args.maxregistros
+RANDOM_STATE = args.randomstate
+QNT_DRIFTS = args.qntdrifts
 
 # Carregar arquivo de hiperparametros
 if args.hiperparametros != "":
