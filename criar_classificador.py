@@ -20,6 +20,6 @@ def criar_classficiador(**kwargs):
         return AdaptiveSemi(reset_on_model_switch=True, detect_drift=True, **kwargs)
     elif argumentos.CLASSIFICADOR == "arf":
         return AdaptiveRandomForestClassifierA(**kwargs)
-    elif argumentos.CLASSIFICADOR == "hat":
+    elif argumentos.CLASSIFICADOR == "htc":
         return HoeffdingAdaptiveTreeClassifierA(**kwargs)
     raise Exception(f"{argumentos.CLASSIFICADOR} não está disponível")

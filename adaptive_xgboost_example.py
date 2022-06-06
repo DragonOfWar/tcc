@@ -54,7 +54,7 @@ evaluator = EvaluatePrequential(
     max_samples=argumentos.MAX_REGISTROS,
     # batch_size=200,
     output_file=salvar_resultados.caminho_resultado_raw,
-    show_plot=True,
+    show_plot=False,
     metrics=["accuracy", "running_time", "kappa"],
 )
 

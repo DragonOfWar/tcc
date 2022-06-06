@@ -1,7 +1,7 @@
 import argumentos
 import salvar_resultados
 from criar_classificador import criar_classficiador
-from skmultiflow.data import AGRAWALGenerator
+from data_stream_generators import get_dataset
 from sklearn.model_selection import GridSearchCV
 
 
@@ -13,7 +13,12 @@ if argumentos.CLASSIFICADOR == "axgb":
         "max_window_size": [512, 1024, 2048, 4096, 8192],
         "min_window_size": [4, 8, 16],
     }
-elif argumentos.CLASSIFICADOR == "incremental":
+elif (
+    argumentos.CLASSIFICADOR == "gustavo"
+    or argumentos.CLASSIFICADOR == "gustavo_r"
+    or argumentos.CLASSIFICADOR == "gustavo_adwin"
+    or argumentos.CLASSIFICADOR == "gustavo_adwin_r"
+):
     parameter_grid = {
         "max_window_size": [512, 1000, 2048, 4096],
         "min_window_size": [1, 4, 8, 16],
@@ -26,7 +31,12 @@ elif argumentos.CLASSIFICADOR == "arf":
     parameter_grid = {"n_estimators": [5, 10, 20, 30]}
 
 print(f"Carregando dataset {argumentos.DATASET}")
-dataset = AGRAWALGenerator(random_state=1).next_sample(argumentos.MAX_REGISTROS)
+dataset = get_dataset(
+    argumentos.DATASET,
+    argumentos.MAX_REGISTROS,
+    argumentos.RANDOM_STATE,
+    argumentos.QNT_DRIFTS,
+).next_sample(argumentos.MAX_REGISTROS)
 print(f"Realizando GridSearchCV")
 
 gs_cv = GridSearchCV(criar_classficiador(), parameter_grid)

@@ -4,6 +4,7 @@ import numpy as np
 import csv
 import os
 import sys
+import config
 from scipy import stats
 
 NAO_FAZER_GRAFICO = "--semgrafico" in sys.argv
@@ -13,8 +14,8 @@ FRIEDMAN_TOTAL = "--friedmantotal" in sys.argv
 
 # Config
 QNT_ITERACOES = 5
-CLASSIFICADORES = ["incremental", "incremental_r", "hat", "arf"]
-DATASETS = ["agr_a", "agr_g", "airlines", "elec", "hyper_f", "sea_a", "sea_g"]
+CLASSIFICADORES = config.CLASSIFICADORES
+DATASETS = config.DATASETS
 
 # Diretorios
 def criar_dir(dir):

@@ -4,6 +4,7 @@ from skmultiflow.data import (
     AGRAWALGenerator,
     FileStream,
 )
+from skmultiflow.data.base_stream import Stream
 
 
 def generate_sea_with_drift(
@@ -42,7 +43,7 @@ def generate_agr_with_drift(
     return stream
 
 
-def get_dataset(dataset, size: int, random_state: int, qnt_drifts: int):
+def get_dataset(dataset: str, size: int, random_state: int, qnt_drifts: int) -> Stream:
     if dataset == "agr_a":
         return generate_agr_with_drift(
             size=size,

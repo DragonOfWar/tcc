@@ -13,7 +13,7 @@ NOME_ARQUIVO_RESULTADOS_GRID_SEARCH = (
     f"resultados_{argumentos.CLASSIFICADOR}_{argumentos.DATASET}.csv"
 )
 NOME_ARQUIVO_MELHORES_HIPERPARAMETROS = (
-    f"melhor_hp_{argumentos.CLASSIFICADOR}_{argumentos.DATASET}.json"
+    f"{argumentos.CLASSIFICADOR}_{argumentos.DATASET}.json"
 )
 
 # Gerar caminhos
