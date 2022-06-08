@@ -14,7 +14,7 @@ FRIEDMAN_TOTAL = "--friedmantotal" in sys.argv
 # Gerar graficos das acuracias
 def gerar_graficos(coluna, dir, nome):
     for d in config.DATASETS:
-        for i in range(1, config.QNT_X):
+        for i in range(1, config.QNT_X + 1):
             print(f"Gerando gráfico de {nome}: processando {d} iteração {i}", end="\r")
             ys = {c: [] for c in config.CLASSIFICADORES}
             xs = []
@@ -65,7 +65,7 @@ if not NAO_FAZER_FRIEDMAN:
                     next(csvr)  # Descartar primeira linha (cabeçalho)
                     for l in csvr:
                         tempos[c].append(l[COLUNA_TEMPO])
-                for i in range(1, config.QNT_X):
+                for i in range(1, config.QNT_X + 1):
                     with open(config.CAMINHOS_RESULTADOS_RAW[d][i][c], "r") as csvfile:
                         csvr = csv.reader(
                             # Preprocessar o csv pra remover os comentarios
