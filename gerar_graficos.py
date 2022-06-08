@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import scikit_posthocs as sp
 import numpy as np
 import csv
-import os
 import sys
 import config
 from scipy import stats
@@ -12,37 +11,16 @@ NAO_FAZER_FRIEDMAN = "--semfriedman" in sys.argv
 # Executa acuracia e kappa pelo resultados_raw ao invés pelo resultados (não ira usar as medias)
 FRIEDMAN_TOTAL = "--friedmantotal" in sys.argv
 
-# Config
-QNT_ITERACOES = 5
-CLASSIFICADORES = config.CLASSIFICADORES
-DATASETS = config.DATASETS
-
-# Diretorios
-def criar_dir(dir):
-    if not os.path.isdir(dir):
-        os.mkdir(dir)
-
-
-CAMINHO_RESULTADOS_RAW = "resultados_raw"
-CAMINHO_RESULTADOS = "resultados"
-CAMINHO_FIGURAS_ACURACIAS = "graficos_acuracias"
-CAMINHO_FIGURAS_KAPPA = "graficos_kappa"
-criar_dir(CAMINHO_FIGURAS_ACURACIAS)
-criar_dir(CAMINHO_FIGURAS_KAPPA)
-
-
 # Gerar graficos das acuracias
 def gerar_graficos(coluna, dir, nome):
-    for d in DATASETS:
-        for i in range(1, QNT_ITERACOES):
+    for d in config.DATASETS:
+        for i in range(1, config.QNT_X):
             print(f"Gerando gráfico de {nome}: processando {d} iteração {i}", end="\r")
-            ys = {c: [] for c in CLASSIFICADORES}
+            ys = {c: [] for c in config.CLASSIFICADORES}
             xs = []
             xs_pronto = False
-            for c in CLASSIFICADORES:
-                with open(
-                    f"{CAMINHO_RESULTADOS_RAW}/resultados_{c}_{d}_{i}.csv", "r"
-                ) as csvfile:
+            for c in config.CLASSIFICADORES:
+                with open(config.CAMINHOS_RESULTADOS_RAW[d][i][c], "r") as csvfile:
                     csvr = csv.reader(
                         # Preprocessar o csv pra remover os comentarios
                         filter(lambda l: l[0] != "#", csvfile),
@@ -65,32 +43,30 @@ def gerar_graficos(coluna, dir, nome):
 
 
 if not NAO_FAZER_GRAFICO:
-    gerar_graficos(2, CAMINHO_FIGURAS_ACURACIAS, "acuracia")
-    gerar_graficos(4, CAMINHO_FIGURAS_KAPPA, "kappa")
+    gerar_graficos(2, config.DIR_FIGURAS_ACURACIAS, "acuracia")
+    gerar_graficos(4, config.DIR_FIGURAS_KAPPA, "kappa")
 
 if not NAO_FAZER_FRIEDMAN:
     # Executar teste de friedman-nemenyi nas acuracias
-    acuracias = {c: [] for c in CLASSIFICADORES}
-    kappas = {c: [] for c in CLASSIFICADORES}
-    tempos = {c: [] for c in CLASSIFICADORES}
+    acuracias = {c: [] for c in config.CLASSIFICADORES}
+    kappas = {c: [] for c in config.CLASSIFICADORES}
+    tempos = {c: [] for c in config.CLASSIFICADORES}
 
     COLUNA_ACURACIA = 2
     COLUNA_KAPPA = 4
     COLUNA_TEMPO = 5
 
     # Ler resultados
-    for d in DATASETS:
-        for c in CLASSIFICADORES:
+    for d in config.DATASETS:
+        for c in config.CLASSIFICADORES:
             if FRIEDMAN_TOTAL:
-                with open(f"{CAMINHO_RESULTADOS}/resultados_{c}_{d}.csv") as csvfile:
+                with open(config.CAMINHOS_RESULTADOS[d][c]) as csvfile:
                     csvr = csv.reader(csvfile, delimiter=",")
                     next(csvr)  # Descartar primeira linha (cabeçalho)
                     for l in csvr:
                         tempos[c].append(l[COLUNA_TEMPO])
-                for i in range(1, QNT_ITERACOES):
-                    with open(
-                        f"{CAMINHO_RESULTADOS_RAW}/resultados_{c}_{d}_{i}.csv", "r"
-                    ) as csvfile:
+                for i in range(1, config.QNT_X):
+                    with open(config.CAMINHOS_RESULTADOS_RAW[d][i][c], "r") as csvfile:
                         csvr = csv.reader(
                             # Preprocessar o csv pra remover os comentarios
                             filter(lambda l: l[0] != "#", csvfile),
@@ -102,7 +78,7 @@ if not NAO_FAZER_FRIEDMAN:
                             kappas[c].append(l[COLUNA_KAPPA])
                 continue
 
-            with open(f"{CAMINHO_RESULTADOS}/resultados_{c}_{d}.csv") as csvfile:
+            with open(config.CAMINHOS_RESULTADOS[d][c]) as csvfile:
                 csvr = csv.reader(csvfile, delimiter=",")
                 next(csvr)  # Descartar primeira linha (cabeçalho)
                 for l in csvr:

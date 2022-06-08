@@ -10,16 +10,16 @@ from modelos_adaptados_para_sklearn import (
 def criar_classficiador(**kwargs):
     if argumentos.CLASSIFICADOR == "axgb":
         return AdaptiveXGBoostClassifier(**kwargs)
-    elif argumentos.CLASSIFICADOR == "gustavo":
+    elif argumentos.CLASSIFICADOR == "afxgb":
         return AdaptiveSemi(reset_on_model_switch=False, detect_drift=False, **kwargs)
-    elif argumentos.CLASSIFICADOR == "gustavo_r":
+    elif argumentos.CLASSIFICADOR == "afxgb_r":
         return AdaptiveSemi(reset_on_model_switch=True, detect_drift=False, **kwargs)
-    elif argumentos.CLASSIFICADOR == "gustavo_adwin":
+    elif argumentos.CLASSIFICADOR == "afxgb_adwin":
         return AdaptiveSemi(reset_on_model_switch=False, detect_drift=True, **kwargs)
-    elif argumentos.CLASSIFICADOR == "gustavo_adwin_r":
+    elif argumentos.CLASSIFICADOR == "afxgb_adwin_r":
         return AdaptiveSemi(reset_on_model_switch=True, detect_drift=True, **kwargs)
     elif argumentos.CLASSIFICADOR == "arf":
         return AdaptiveRandomForestClassifierA(**kwargs)
-    elif argumentos.CLASSIFICADOR == "htc":
+    elif argumentos.CLASSIFICADOR == "hat":
         return HoeffdingAdaptiveTreeClassifierA(**kwargs)
     raise Exception(f"{argumentos.CLASSIFICADOR} não está disponível")

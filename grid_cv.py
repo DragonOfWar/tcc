@@ -14,10 +14,10 @@ if argumentos.CLASSIFICADOR == "axgb":
         "min_window_size": [4, 8, 16],
     }
 elif (
-    argumentos.CLASSIFICADOR == "gustavo"
-    or argumentos.CLASSIFICADOR == "gustavo_r"
-    or argumentos.CLASSIFICADOR == "gustavo_adwin"
-    or argumentos.CLASSIFICADOR == "gustavo_adwin_r"
+    argumentos.CLASSIFICADOR == "afxgb"
+    or argumentos.CLASSIFICADOR == "afxgb_r"
+    or argumentos.CLASSIFICADOR == "afxgb_adwin"
+    or argumentos.CLASSIFICADOR == "afxgb_adwin_r"
 ):
     parameter_grid = {
         "max_window_size": [512, 1000, 2048, 4096],

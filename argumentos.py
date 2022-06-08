@@ -1,7 +1,8 @@
 import argparse
-from ast import parse
+import config
 import json
 import sys
+import config
 
 parser = argparse.ArgumentParser()
 
@@ -66,14 +67,20 @@ MAX_REGISTROS = args.maxregistros
 RANDOM_STATE = args.randomstate
 QNT_DRIFTS = args.qntdrifts
 
-# Carregar arquivo de hiperparametros
-if args.hiperparametros != "":
-    try:
-        with open(args.hiperparametros) as arquivo:
-            HIPER_PARAMETROS = json.loads(arquivo.read())
-    except IOError:
-        print(f"{sys.argv[0]} erro: arquivo {args.hiperparametros} não existe")
-    except json.JSONDecodeError:
-        print(
-            f"{sys.argv[0]} erro: não foi possível ler {args.hiperparametros} pois o arquivo não está formatado como JSON corretamente"
-        )
+CAM_HIP = config.CAMINHOS_HIPERPARAMETROS[CLASSIFICADOR]
+CAM_RES = config.CAMINHOS_RESULTADOS[DATASET][CLASSIFICADOR]
+CAM_RES_GS = config.CAMINHOS_RESULTADOS_GS[DATASET][CLASSIFICADOR]
+CAM_RES_RAW = config.CAMINHOS_RESULTADOS_RAW[DATASET][ITERACAO][CLASSIFICADOR]
+
+caminho_hp = args.hiperparametros
+if caminho_hp == "":
+    caminho_hp = config.CAMINHOS_HIPERPARAMETROS[CLASSIFICADOR]
+try:
+    with open(caminho_hp) as arquivo:
+        HIPER_PARAMETROS = json.loads(arquivo.read())
+except IOError:
+    print(f"{sys.argv[0]} erro: arquivo {caminho_hp} não existe")
+except json.JSONDecodeError:
+    print(
+        f"{sys.argv[0]} erro: não foi possível ler {caminho_hp} pois o arquivo não está formatado como JSON corretamente"
+    )

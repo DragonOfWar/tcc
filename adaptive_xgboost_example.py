@@ -3,6 +3,7 @@ import argumentos
 from criar_classificador import criar_classficiador
 from skmultiflow.evaluation import EvaluatePrequential
 from data_stream_generators import get_dataset
+import config
 
 
 # # Adaptive XGBoost classifier parameters
@@ -49,11 +50,12 @@ stream = get_dataset(
 # Criar modelo
 model = criar_classficiador(**argumentos.HIPER_PARAMETROS)
 
+
 evaluator = EvaluatePrequential(
     pretrain_size=0,
     max_samples=argumentos.MAX_REGISTROS,
     # batch_size=200,
-    output_file=salvar_resultados.caminho_resultado_raw,
+    output_file=argumentos.CAM_RES_RAW,
     show_plot=False,
     metrics=["accuracy", "running_time", "kappa"],
 )
