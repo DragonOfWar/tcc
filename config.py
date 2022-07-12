@@ -9,7 +9,10 @@ CLASSIFICADORES = [
     "afxgb_adwin_r",
     "hat",
     "arf",
-    # "axgb",
+    "axgb",
+    "lbht",
+    "obht",
+    "samknn",
 ]
 
 DATASETS = [
