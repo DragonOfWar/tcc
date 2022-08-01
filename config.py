@@ -23,6 +23,17 @@ DATASETS = [
     "agr_a",
     "agr_g",
     "hyper_f",
+    "rbf_a",
+    "rbf_g",
+    "trees_a",
+    "trees_g",
+    "sine_a",
+    "sine_g",
+    "stagger_a",
+    "stagger_g",
+    "higgs",
+    "hepmass",
+    "susy"
 ]
 
 DIRETORIOS = [
