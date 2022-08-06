@@ -114,11 +114,13 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
                     self._y_small_buffer, delete_idx, axis=0
                 )
 
-            self._X_small_buffer = np.concatenate((self._X_small_buffer, npArrX))
-            self._y_small_buffer = np.concatenate((self._y_small_buffer, npArrY))
+            self._X_small_buffer = np.concatenate(
+                (self._X_small_buffer, npArrX))
+            self._y_small_buffer = np.concatenate(
+                (self._y_small_buffer, npArrY))
         else:
-            self._X_small_buffer = npArrX[0 : self.small_window_size]
-            self._y_small_buffer = npArrY[0 : self.small_window_size]
+            self._X_small_buffer = npArrX[0: self.small_window_size]
+            self._y_small_buffer = npArrY[0: self.small_window_size]
 
     def _unlabeled_fit(self):
         # unlabeled = map(lambda x: x != 0 and x != 1, self._y_buffer)
@@ -175,7 +177,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         if self._first_run:
             self._X_buffer = np.array([]).reshape(0, get_dimensions(X)[1])
             self._y_buffer = np.array([])
-            self._X_small_buffer = np.array([]).reshape(0, get_dimensions(X)[1])
+            self._X_small_buffer = np.array(
+                []).reshape(0, get_dimensions(X)[1])
             self._y_small_buffer = np.array([])
             self._first_run = False
         self._X_buffer = np.concatenate((self._X_buffer, X))
@@ -198,7 +201,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
             correctly_classifies = self.predict(X) == y
             self._drift_detector.add_element(int(not correctly_classifies))
             if self._drift_detector.detected_change():
-                print("Drift detected! Resetting window")
+                # print("Drift detected! Resetting window")
                 self._reset_window_size()
 
     def _adjust_window_size(self):
@@ -277,4 +280,5 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         """
         Not implemented for this method.
         """
-        raise NotImplementedError("predict_proba is not implemented for this method.")
+        raise NotImplementedError(
+            "predict_proba is not implemented for this method.")
