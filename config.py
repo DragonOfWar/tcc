@@ -33,7 +33,7 @@ DATASETS = [
     "stagger_g",
     "higgs",
     "hepmass",
-    "susy"
+    "susy",
 ]
 
 DIRETORIOS = [

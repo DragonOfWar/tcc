@@ -7,6 +7,8 @@ from skmultiflow.utils import get_dimensions
 from sklearn.neighbors import KNeighborsClassifier
 from skmultiflow.drift_detection import ADWIN
 
+xgb.set_config(verbosity=0)
+
 
 class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
     def __init__(
@@ -19,8 +21,11 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         small_window_size=0,
         max_buffer=5,
         pre_train=2,
+        trees_per_train=1,
+        percent_update_trees=1.0,
         reset_on_model_switch=True,
         detect_drift=False,  # Reseta a janela se houver a troca do modelo MAIN pra TEMP
+        use_updater=True,
     ):
         super().__init__()
         self.learning_rate = learning_rate
@@ -28,6 +33,9 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         self.max_window_size = max_window_size
         self.min_window_size = min_window_size
         self.detect_drift = detect_drift
+        self.trees_per_train = trees_per_train
+        self.percent_update_trees = percent_update_trees
+        self.use_updater = use_updater
         self._first_run = True
         self._booster = None
         self._temp_booster = None
@@ -62,6 +70,9 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
             "eval_metric": "logloss",
             "max_depth": self.max_depth,
         }
+        self._boosting_params_update = self._boosting_params.copy()
+        self._boosting_params_update["process_type"] = "update"
+        self._boosting_params_update["updater"] = "refresh"
         if self.detect_drift:
             self._drift_detector = ADWIN()
 
@@ -114,13 +125,11 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
                     self._y_small_buffer, delete_idx, axis=0
                 )
 
-            self._X_small_buffer = np.concatenate(
-                (self._X_small_buffer, npArrX))
-            self._y_small_buffer = np.concatenate(
-                (self._y_small_buffer, npArrY))
+            self._X_small_buffer = np.concatenate((self._X_small_buffer, npArrX))
+            self._y_small_buffer = np.concatenate((self._y_small_buffer, npArrY))
         else:
-            self._X_small_buffer = npArrX[0: self.small_window_size]
-            self._y_small_buffer = npArrY[0: self.small_window_size]
+            self._X_small_buffer = npArrX[0 : self.small_window_size]
+            self._y_small_buffer = npArrY[0 : self.small_window_size]
 
     def _unlabeled_fit(self):
         # unlabeled = map(lambda x: x != 0 and x != 1, self._y_buffer)
@@ -177,8 +186,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         if self._first_run:
             self._X_buffer = np.array([]).reshape(0, get_dimensions(X)[1])
             self._y_buffer = np.array([])
-            self._X_small_buffer = np.array(
-                []).reshape(0, get_dimensions(X)[1])
+            self._X_small_buffer = np.array([]).reshape(0, get_dimensions(X)[1])
             self._y_small_buffer = np.array([])
             self._first_run = False
         self._X_buffer = np.concatenate((self._X_buffer, X))
@@ -236,17 +244,27 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         d_mini_batch_train = xgb.DMatrix(X, y.astype(int))
 
         if currentBooster:
+            booster = currentBooster
+            if self.use_updater:
+                num_boosted_rounds = len(currentBooster.get_dump())
+                booster = xgb.train(
+                    params=self._boosting_params_update,
+                    dtrain=d_mini_batch_train,
+                    num_boost_round=int(num_boosted_rounds * self.percent_update_trees),
+                    xgb_model=booster,
+                )
+
             booster = xgb.train(
                 params=self._boosting_params,
                 dtrain=d_mini_batch_train,
-                num_boost_round=1,
-                xgb_model=currentBooster,
+                num_boost_round=self.trees_per_train,
+                xgb_model=booster,
             )
         else:
             booster = xgb.train(
                 params=self._boosting_params,
                 dtrain=d_mini_batch_train,
-                num_boost_round=1,
+                num_boost_round=self.trees_per_train,
                 verbose_eval=False,
             )
         return booster
@@ -270,8 +288,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         """
         # start_time = time.time()
         if self._booster:
-            d_test = xgb.DMatrix(X)
-            predicted = self._booster.predict(d_test)
+            predicted = self._booster.inplace_predict(X)
             return np.array(predicted > 0.5).astype(int)
         # Ensemble is empty, return default values (0)
         return np.zeros(get_dimensions(X)[0])
@@ -280,5 +297,4 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         """
         Not implemented for this method.
         """
-        raise NotImplementedError(
-            "predict_proba is not implemented for this method.")
+        raise NotImplementedError("predict_proba is not implemented for this method.")
