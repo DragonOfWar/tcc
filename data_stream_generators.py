@@ -15,7 +15,7 @@ def generate_sea_with_drift(
     size: int, width: int = 1, qnt_drifts=3, random_state: int = 1
 ):
     stream = SEAGenerator(random_state=random_state, classification_function=0)
-    particoes = size / (qnt_drifts + 1)
+    particoes = size // (qnt_drifts + 1)
     for i in range(qnt_drifts):
         stream = ConceptDriftStream(
             stream=stream,
@@ -32,9 +32,8 @@ def generate_sea_with_drift(
 def generate_agr_with_drift(
     size: int, width: int = 1, qnt_drifts=3, random_state: int = 1
 ):
-    stream = AGRAWALGenerator(
-        random_state=random_state, classification_function=0)
-    particoes = size / (qnt_drifts + 1)
+    stream = AGRAWALGenerator(random_state=random_state, classification_function=0)
+    particoes = size // (qnt_drifts + 1)
     for i in range(qnt_drifts):
         stream = ConceptDriftStream(
             stream=stream,
@@ -54,7 +53,7 @@ def generate_randomrbf_with_drift(
     stream = RandomRBFGeneratorDrift(
         model_random_state=random_state,
         sample_random_state=random_state,
-        change_speed=0.1
+        change_speed=0.1,
     )
     particoes = size // (qnt_drifts + 1)
     for i in range(qnt_drifts):
@@ -75,9 +74,8 @@ def generate_randomrbf_with_drift(
 def generate_sine_with_drift(
     size: int, width: int = 1, qnt_drifts=3, random_state: int = 1
 ):
-    stream = SineGenerator(random_state=random_state,
-                           classification_function=0)
-    particoes = size / (qnt_drifts + 1)
+    stream = SineGenerator(random_state=random_state, classification_function=0)
+    particoes = size // (qnt_drifts + 1)
     for i in range(qnt_drifts):
         stream = ConceptDriftStream(
             stream=stream,
@@ -94,9 +92,8 @@ def generate_sine_with_drift(
 def generate_stagger_with_drift(
     size: int, width: int = 1, qnt_drifts=3, random_state: int = 1
 ):
-    stream = STAGGERGenerator(
-        random_state=random_state, classification_function=0)
-    particoes = size / (qnt_drifts + 1)
+    stream = STAGGERGenerator(random_state=random_state, classification_function=0)
+    particoes = size // (qnt_drifts + 1)
     for i in range(qnt_drifts):
         stream = ConceptDriftStream(
             stream=stream,
@@ -116,7 +113,7 @@ def generate_randomtrees_with_drift(
     stream = RandomTreeGenerator(
         tree_random_state=random_state, sample_random_state=random_state
     )
-    particoes = size / (qnt_drifts + 1)
+    particoes = size // (qnt_drifts + 1)
     for i in range(qnt_drifts):
         stream = ConceptDriftStream(
             stream=stream,
