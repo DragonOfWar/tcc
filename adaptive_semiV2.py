@@ -23,8 +23,8 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         pre_train=2,
         trees_per_train=1,
         percent_update_trees=1.0,
-        reset_on_model_switch=True,
-        detect_drift=False,  # Reseta a janela se houver a troca do modelo MAIN pra TEMP
+        reset_on_model_switch=False,  # Reseta a janela se houver a troca do modelo MAIN pra TEMP
+        detect_drift=False,
         use_updater=True,
     ):
         super().__init__()

@@ -4,5 +4,7 @@
     "max_buffer": 25,
     "pre_train": 15,
     "max_window_size": 1000,
-    "min_window_size": 1
+    "min_window_size": 1,
+    "detect_drift": true,
+    "reset_on_model_switch": false
 }

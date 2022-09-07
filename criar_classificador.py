@@ -10,17 +10,23 @@ from skmultiflow.lazy import SAMKNNClassifier
 from skmultiflow.trees import HoeffdingTreeClassifier
 
 
+AFXGB_CONIFGS = [
+    "afxgb",
+    "afxgb_r",
+    "afxgb_adwin",
+    "afxgb_adwin_r_update100",
+    "afxgb_adwin_r_update75",
+    "afxgb_adwin_r_update50",
+    "afxgb_adwin_r_update25",
+    "afxgb_adwin_r_update0",
+]
+
+
 def criar_classficiador(**kwargs):
     if argumentos.CLASSIFICADOR == "axgb":
         return AdaptiveXGBoostClassifier(**kwargs)
-    elif argumentos.CLASSIFICADOR == "afxgb":
-        return AdaptiveSemi(reset_on_model_switch=False, detect_drift=False, **kwargs)
-    elif argumentos.CLASSIFICADOR == "afxgb_r":
-        return AdaptiveSemi(reset_on_model_switch=True, detect_drift=False, **kwargs)
-    elif argumentos.CLASSIFICADOR == "afxgb_adwin":
-        return AdaptiveSemi(reset_on_model_switch=False, detect_drift=True, **kwargs)
-    elif argumentos.CLASSIFICADOR == "afxgb_adwin_r":
-        return AdaptiveSemi(reset_on_model_switch=True, detect_drift=True, **kwargs)
+    elif argumentos.CLASSIFICADOR in AFXGB_CONIFGS:
+        return AdaptiveSemi(**kwargs)
     elif argumentos.CLASSIFICADOR == "arf":
         return AdaptiveRandomForestClassifierA(**kwargs)
     elif argumentos.CLASSIFICADOR == "hat":

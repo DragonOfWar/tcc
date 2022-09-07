@@ -5,6 +5,7 @@
     "pre_train": 15,
     "max_window_size": 1000,
     "min_window_size": 1,
-    "detect_drift": false,
-    "reset_on_model_switch": false
+    "detect_drift": true,
+    "reset_on_model_switch": true,
+    "percent_update_trees": 1.0
 }
