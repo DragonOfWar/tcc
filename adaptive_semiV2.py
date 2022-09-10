@@ -244,6 +244,7 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
         d_mini_batch_train = xgb.DMatrix(X, y.astype(int))
 
         if currentBooster:
+            new_trees = 0
             booster = currentBooster
             if self.use_updater:
                 num_boosted_rounds = len(currentBooster.get_dump())
@@ -253,11 +254,12 @@ class AdaptiveSemi(BaseSKMObject, ClassifierMixin):
                     num_boost_round=int(num_boosted_rounds * self.percent_update_trees),
                     xgb_model=booster,
                 )
+                new_trees = num_boosted_rounds - len(booster.get_dump())
 
             booster = xgb.train(
                 params=self._boosting_params,
                 dtrain=d_mini_batch_train,
-                num_boost_round=self.trees_per_train,
+                num_boost_round=self.trees_per_train + new_trees,
                 xgb_model=booster,
             )
         else:
