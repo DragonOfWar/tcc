@@ -53,6 +53,7 @@ model = criar_classficiador(**argumentos.HIPER_PARAMETROS)
 
 evaluator = EvaluatePrequential(
     pretrain_size=0,
+    n_wait=1,
     max_samples=argumentos.MAX_REGISTROS,
     # batch_size=200,
     output_file=argumentos.CAM_RES_RAW,
