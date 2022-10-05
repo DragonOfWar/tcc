@@ -27,10 +27,18 @@ def gerar_graficos(coluna, dir, nome):
                         delimiter=",",
                     )
                     next(csvr)  # ignorar primeira linha (cabeçalho)
+                    buff = [0.0 for _ in range(config.GRAPH_BUFF_SIZE)]
+                    i_buff = 0
                     for l in csvr:
+                        if i_buff < len(buff):
+                            buff[i_buff] = float(l[coluna])
+                            i_buff += 1
+                            continue
+
                         if not xs_pronto:
                             xs.append(int(l[0]))
-                        ys[c].append(float(l[coluna]))
+                        ys[c].append(np.average(buff))
+                        i_buff = 0
                 xs_pronto = True
             for c, y in ys.items():
                 plt.plot(xs, y, label=c)
